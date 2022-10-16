@@ -13,19 +13,26 @@ def load_json():
         else:
             if message['is_unsent']:
                 message_type = 'unsent'
+                count = 1
             if 'content' in message:
                 message_type = 'content'
+                count = len(message['content'].split())
             elif 'gifs' in message:
                 message_type = 'gifs'
+                count = len(message['gifs'])
             elif 'photos' in message:
                 message_type = 'photos'
+                count = len(message['photos'])
             elif 'audio_files' in message:
                 message_type = 'audio_files'
+                count = len(message['audio_files'])
             elif 'videos' in message:
                 message_type = 'videos'
+                count = len(message['videos'])
             elif 'sticker' in message:
                 message_type = 'sticker'
-            new_row = {'timestamp':message['timestamp_ms'], 'name':message['sender_name'], 'message_type':message_type}
+                count = 1
+            new_row = {'timestamp':message['timestamp_ms'], 'name':message['sender_name'], 'message_type':message_type, 'count':count}
             df = pd.concat([df, pd.DataFrame([new_row])])
     print(df)
     print(df.groupby(['message_type']).count())

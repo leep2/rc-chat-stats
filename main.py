@@ -1,6 +1,11 @@
 import json
 import re
 import pandas as pd
+from datetime import datetime
+
+def truncate_timestamp(timestamp_ms):
+    dt = datetime.fromtimestamp(timestamp_ms/1000)
+    return datetime(dt.year, dt.month, dt.day)
 
 def load_json():
     with open('json/message_1.json') as file:
@@ -32,8 +37,9 @@ def load_json():
             elif 'sticker' in message:
                 message_type = 'sticker'
                 count = 1
-            new_row = {'timestamp':message['timestamp_ms'], 'name':message['sender_name'], 'message_type':message_type, 'count':count}
+            new_row = {'timestamp_ms':message['timestamp_ms'], 'name':message['sender_name'], 'message_type':message_type, 'count':count}
             df = pd.concat([df, pd.DataFrame([new_row])])
+            df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     print(df)
     print(df.groupby(['message_type']).count())
 

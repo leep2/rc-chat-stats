@@ -39,7 +39,7 @@ def load_json():
                 count = 1
             new_row = {'timestamp_ms':message['timestamp_ms'], 'name':message['sender_name'], 'message_type':message_type, 'count':count}
             df = pd.concat([df, pd.DataFrame([new_row])])
-            df['date'] = df['timestamp_ms'].map(truncate_timestamp)
+    df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     print(df)
     print(df.groupby(['message_type']).count())
 

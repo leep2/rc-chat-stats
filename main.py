@@ -10,8 +10,8 @@ def truncate_timestamp(timestamp_ms):
 def load_json():
     with open('json/message_1.json') as file:
         data = json.load(file)
-        
-    df = pd.DataFrame()
+    
+    message_list = []
     for message in data['messages']:
         if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
             pass
@@ -37,12 +37,13 @@ def load_json():
             elif 'sticker' in message:
                 message_type = 'sticker'
                 count = 1
-            new_row = {'timestamp_ms':message['timestamp_ms'], 'name':message['sender_name'], 'message_type':message_type, 'count':count}
-            df = pd.concat([df, pd.DataFrame([new_row])])
+            new_row = [message['timestamp_ms'], message['sender_name'], message_type, count]
+            message_list.append(new_row)
+            
+    df = pd.DataFrame(message_list, columns=['timestamp_ms', 'name', 'message_type', 'count'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     print(df)
     print(df.groupby(['message_type']).count())
-
 
 if __name__ == '__main__':
     load_json()

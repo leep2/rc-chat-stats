@@ -1,11 +1,11 @@
 import json
 import re
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, date
 
 def truncate_timestamp(timestamp_ms):
     dt = datetime.fromtimestamp(timestamp_ms/1000)
-    return datetime(dt.year, dt.month, dt.day)
+    return date(dt.year, dt.month, dt.day)
 
 def load_json():
     with open('json/message_1.json') as file:

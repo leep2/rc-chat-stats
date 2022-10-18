@@ -13,8 +13,7 @@ def filter_stats(df, current_date = date.today(), begin = None, end = -1):
     begin_date = current_date + timedelta(begin)
     end_date = current_date + timedelta(end)
     by_date = df[(df['date']>=begin_date) & (df['date']<=end_date)]
-    sent = by_date[by_date['message_type'] != 'unsent']
-    return sent.groupby(['name'])['count'].count()
+    return by_date.groupby(['name'])['count'].count()
 
 def load_json():
     with open('json/message_1.json') as file:
@@ -52,6 +51,8 @@ def load_json():
     df = pd.DataFrame(message_list, columns=['timestamp_ms', 'name', 'message_type', 'count'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     print(df)
+    sent = df[df['message_type'] != 'unsent']
+    print(sent)
     print(df.groupby(['message_type']).count())
     
     print(filter_stats(df, CURRENT_DATE, -1, -1))

@@ -1,11 +1,20 @@
 import json
 import re
 import pandas as pd
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+
+CURRENT_DATE = date(2022, 10, 4)
 
 def truncate_timestamp(timestamp_ms):
     dt = datetime.fromtimestamp(timestamp_ms/1000)
     return date(dt.year, dt.month, dt.day)
+
+def filter_stats(df, current_date = date.today(), begin = None, end = -1):
+    begin_date = current_date + timedelta(begin)
+    end_date = current_date + timedelta(end)
+    by_date = df[(df['date']>=begin_date) & (df['date']<=end_date)]
+    sent = by_date[by_date['message_type'] != 'unsent']
+    return sent.groupby(['name'])['count'].count()
 
 def load_json():
     with open('json/message_1.json') as file:
@@ -44,6 +53,8 @@ def load_json():
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     print(df)
     print(df.groupby(['message_type']).count())
+    
+    print(filter_stats(df, CURRENT_DATE, -1, -1))
 
 if __name__ == '__main__':
     load_json()

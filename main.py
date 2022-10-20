@@ -3,6 +3,7 @@ import json
 import re
 import pandas as pd
 from datetime import datetime, date, timedelta
+import csv
 
 CURRENT_DATE = date(2022, 10, 4)
 
@@ -57,7 +58,23 @@ def load_json():
     print(sent)
     print(df.groupby(['message_type']).count())
     
-    print(filter_stats(df, CURRENT_DATE, -1, -1))
+    f = filter_stats(df, CURRENT_DATE, -1, -1)
+    
+    with open('nicknames.csv', mode='r') as infile:
+        reader = csv.reader(infile)
+        names_dict = {rows[0]:rows[1] for rows in reader}
+        
+    #f['nickname'] = f['name'].map(names_dict)
+    f['nickname'] = 'blah'
+    print(f)
+    print(type(f))
+    print(type(sent))
+    #print(f['name'])
+    z = pd.DataFrame({'name':f.index, 'count':f.values})
+    print(z)
+    z['nickname'] = z['name'].map(names_dict)
+    print(z)
+    
 
 if __name__ == '__main__':
     load_json()

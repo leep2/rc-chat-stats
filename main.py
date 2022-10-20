@@ -53,10 +53,7 @@ def load_json():
             
     df = pd.DataFrame(message_list, columns=['timestamp_ms', 'name', 'message_type', 'count'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
-    print(df)
     sent = df[df['message_type'] != 'unsent']
-    print(sent)
-    print(df.groupby(['message_type']).count())
     
     f = filter_stats(df, CURRENT_DATE, -1, -1)
     
@@ -64,17 +61,9 @@ def load_json():
         reader = csv.reader(infile)
         names_dict = {rows[0]:rows[1] for rows in reader}
         
-    #f['nickname'] = f['name'].map(names_dict)
-    f['nickname'] = 'blah'
-    print(f)
-    print(type(f))
-    print(type(sent))
-    #print(f['name'])
     z = pd.DataFrame({'name':f.index, 'count':f.values})
-    print(z)
     z['nickname'] = z['name'].map(names_dict)
     print(z)
-    
 
 if __name__ == '__main__':
     load_json()

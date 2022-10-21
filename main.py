@@ -64,13 +64,8 @@ def load_json():
     sent = df[df['message_type'] != 'unsent']
     
     f = filter_stats(sent, CURRENT_DATE, -1, -1)
-    
-#    with open('nicknames.csv', mode='r') as infile:
-#        reader = csv.reader(infile)
-#        names_dict = {rows[0]:rows[1] for rows in reader}
         
     z = pd.DataFrame({'name':f.index, 'count':f.values})
-#    z['nickname'] = z['name'].map(names_dict)
     y = deidentify(z)
     print(y)
 

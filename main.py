@@ -3,6 +3,7 @@ import json
 import re
 import pandas as pd
 from datetime import datetime, date, timedelta
+import csv
 
 CURRENT_DATE = date(2022, 10, 4)
 
@@ -15,6 +16,14 @@ def filter_stats(df, current_date = date.today(), begin = None, end = -1):
     end_date = current_date + timedelta(end)
     by_date = df[(df['date']>=begin_date) & (df['date']<=end_date)]
     return by_date.groupby(['name'])['count'].count()
+
+def deidentify(df):
+    with open('nicknames.csv', mode='r') as infile:
+        reader = csv.reader(infile)
+        names_dict = {rows[0]:rows[1] for rows in reader}
+        
+    df['nickname'] = df['name'].map(names_dict)
+    return df
 
 def load_json():
     message_list = []
@@ -52,12 +61,13 @@ def load_json():
             
     df = pd.DataFrame(message_list, columns=['timestamp_ms', 'name', 'message_type', 'count'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
-    print(df)
     sent = df[df['message_type'] != 'unsent']
-    print(sent)
-    print(df.groupby(['message_type']).count())
     
-    print(filter_stats(df, CURRENT_DATE, -1, -1))
+    f = filter_stats(sent, CURRENT_DATE, -1, -1)
+        
+    z = pd.DataFrame({'name':f.index, 'count':f.values})
+    y = deidentify(z)
+    print(y)
 
 if __name__ == '__main__':
     load_json()

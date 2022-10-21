@@ -17,6 +17,14 @@ def filter_stats(df, current_date = date.today(), begin = None, end = -1):
     by_date = df[(df['date']>=begin_date) & (df['date']<=end_date)]
     return by_date.groupby(['name'])['count'].count()
 
+def deidentify(df):
+    with open('nicknames.csv', mode='r') as infile:
+        reader = csv.reader(infile)
+        names_dict = {rows[0]:rows[1] for rows in reader}
+        
+    df['nickname'] = df['name'].map(names_dict)
+    return df
+
 def load_json():
     message_list = []
     for filename in os.listdir('json'):
@@ -55,15 +63,16 @@ def load_json():
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     sent = df[df['message_type'] != 'unsent']
     
-    f = filter_stats(df, CURRENT_DATE, -1, -1)
+    f = filter_stats(sent, CURRENT_DATE, -1, -1)
     
-    with open('nicknames.csv', mode='r') as infile:
-        reader = csv.reader(infile)
-        names_dict = {rows[0]:rows[1] for rows in reader}
+#    with open('nicknames.csv', mode='r') as infile:
+#        reader = csv.reader(infile)
+#        names_dict = {rows[0]:rows[1] for rows in reader}
         
     z = pd.DataFrame({'name':f.index, 'count':f.values})
-    z['nickname'] = z['name'].map(names_dict)
-    print(z)
+#    z['nickname'] = z['name'].map(names_dict)
+    y = deidentify(z)
+    print(y)
 
 if __name__ == '__main__':
     load_json()

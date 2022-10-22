@@ -11,11 +11,15 @@ def truncate_timestamp(timestamp_ms):
     dt = datetime.fromtimestamp(timestamp_ms/1000)
     return date(dt.year, dt.month, dt.day)
 
-def filter_stats(df, current_date = date.today(), begin = None, end = -1):
+def filter_by_time(df, current_date = date.today(), begin = None, end = -1):
     begin_date = current_date + timedelta(begin)
     end_date = current_date + timedelta(end)
-    by_date = df[(df['date']>=begin_date) & (df['date']<=end_date)]
-    return by_date.groupby(['name'])['count'].count()
+    return df[(df['date']>=begin_date) & (df['date']<=end_date)]
+    #return by_date.groupby(['name'])['count'].count()
+
+def message_counts(df):
+    counts = df.groupby(['name'])['count'].count()
+    return pd.DataFrame({'name':counts.index, 'count':counts.values})
 
 def deidentify(df):
     with open('nicknames.csv', mode='r') as infile:
@@ -63,13 +67,15 @@ def load_json():
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     return df[df['message_type'] != 'unsent']
     
-def message_counts(df):
-    f = filter_stats(df, CURRENT_DATE, -1, -1)
+def combine_message_counts(df):
+    #f = filter_stats(df, CURRENT_DATE, -1, -1)
         
-    d = pd.DataFrame({'name':f.index, 'count':f.values})
-    return deidentify(d)
+    #d = pd.DataFrame({'name':f.index, 'count':f.values})
+    filtered = filter_by_time(df, CURRENT_DATE, -1, -1)
+    counts = message_counts(filtered)
+    return deidentify(counts)
 
 if __name__ == '__main__':
     sent_messages = load_json()
-    d = message_counts(sent_messages)
+    d = combine_message_counts(sent_messages)
     print(d)

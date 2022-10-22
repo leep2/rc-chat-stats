@@ -15,8 +15,7 @@ def filter_by_time(df, current_date = date.today(), begin = None, end = -1):
     begin_date = current_date + timedelta(begin)
     end_date = current_date + timedelta(end)
     return df[(df['date']>=begin_date) & (df['date']<=end_date)]
-    #return by_date.groupby(['name'])['count'].count()
-
+    
 def message_counts(df):
     counts = df.groupby(['name'])['count'].count()
     return pd.DataFrame({'name':counts.index, 'count':counts.values})

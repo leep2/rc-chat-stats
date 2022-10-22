@@ -61,13 +61,15 @@ def load_json():
             
     df = pd.DataFrame(message_list, columns=['timestamp_ms', 'name', 'message_type', 'count'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
-    sent = df[df['message_type'] != 'unsent']
+    return df[df['message_type'] != 'unsent']
     
-    f = filter_stats(sent, CURRENT_DATE, -1, -1)
+def message_counts(df):
+    f = filter_stats(df, CURRENT_DATE, -1, -1)
         
     z = pd.DataFrame({'name':f.index, 'count':f.values})
     y = deidentify(z)
     print(y)
 
 if __name__ == '__main__':
-    load_json()
+    sent_messages = load_json()
+    message_counts(sent_messages)

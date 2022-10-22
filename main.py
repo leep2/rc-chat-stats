@@ -66,10 +66,10 @@ def load_json():
 def message_counts(df):
     f = filter_stats(df, CURRENT_DATE, -1, -1)
         
-    z = pd.DataFrame({'name':f.index, 'count':f.values})
-    y = deidentify(z)
-    print(y)
+    d = pd.DataFrame({'name':f.index, 'count':f.values})
+    return deidentify(d)
 
 if __name__ == '__main__':
     sent_messages = load_json()
-    message_counts(sent_messages)
+    d = message_counts(sent_messages)
+    print(d)

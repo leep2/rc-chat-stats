@@ -67,7 +67,7 @@ def load_json():
     return df[df['message_type'] != 'unsent']
     
 def combine_message_counts(df):
-    counts = message_counts(filter_by_time(df, CURRENT_DATE, -1, -1))
+    yesterday = message_counts(filter_by_time(df, CURRENT_DATE, -1, -1))
     return deidentify(counts)
 
 if __name__ == '__main__':

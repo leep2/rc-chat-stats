@@ -20,14 +20,6 @@ def message_counts(df):
     counts = df.groupby(['name'])['count'].count()
     return pd.DataFrame({'name':counts.index, 'count':counts.values})
 
-def deidentify(df):
-    with open('nicknames.csv', mode='r') as infile:
-        reader = csv.reader(infile)
-        names_dict = {rows[0]:rows[1] for rows in reader}
-        
-    df['nickname'] = df['name'].map(names_dict)
-    return df
-
 def load_json():
     message_list = []
     for filename in os.listdir('json'):
@@ -73,13 +65,25 @@ def combine_message_counts(df):
     day_before['period'] = 'Day Before'
     week = message_counts(filter_by_time(df, CURRENT_DATE, -7, -1))
     week['period'] = 'Last Week'
-    deid = deidentify(pd.concat([yesterday, day_before, week], axis=0))
-    print(deid[deid['nickname'].isnull()])
-    deid.drop(['name'], axis=1, inplace=True)
-    return deid
+    #deid = deidentify(pd.concat([yesterday, day_before, week], axis=0))
+    #print(deid[deid['nickname'].isnull()])
+    #deid.drop(['name'], axis=1, inplace=True)
+    #return deid
+    return pd.concat([yesterday, day_before, week], axis=0)
+
+def deidentify(df):
+    with open('nicknames.csv', mode='r') as infile:
+        reader = csv.reader(infile)
+        names_dict = {rows[0]:rows[1] for rows in reader}
+        
+    df['nickname'] = df['name'].map(names_dict)
+    print(df[df['nickname'].isnull()])
+    df.drop(['name'], axis=1, inplace=True)
+    return df
 
 if __name__ == '__main__':
     sent_messages = load_json()
     counts = combine_message_counts(sent_messages)
-    print(counts)
-    counts.to_csv('counts.csv', index=False)
+    deid = deidentify(counts)
+    print(deid)
+    deid.to_csv('counts.csv', index=False)

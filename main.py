@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 import csv
 
-CURRENT_DATE = date(2022, 10, 4)
+CURRENT_DATE = date(2022, 10, 6)
 
 def truncate_timestamp(timestamp_ms):
     dt = datetime.fromtimestamp(timestamp_ms/1000)
@@ -68,9 +68,18 @@ def load_json():
     
 def combine_message_counts(df):
     yesterday = message_counts(filter_by_time(df, CURRENT_DATE, -1, -1))
-    return deidentify(counts)
+    yesterday['period'] = 'Yesterday'
+    day_before = message_counts(filter_by_time(df, CURRENT_DATE, -2, -2))
+    day_before['period'] = 'Day Before'
+    week = message_counts(filter_by_time(df, CURRENT_DATE, -7, -1))
+    week['period'] = 'Last Week'
+    deid = deidentify(pd.concat([yesterday, day_before, week], axis=0))
+    print(deid[deid['nickname'].isnull()])
+    deid.drop(['name'], axis=1, inplace=True)
+    return deid
 
 if __name__ == '__main__':
     sent_messages = load_json()
-    d = combine_message_counts(sent_messages)
-    print(d)
+    counts = combine_message_counts(sent_messages)
+    print(counts)
+    counts.to_csv('counts.csv', index=False)

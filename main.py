@@ -65,10 +65,6 @@ def combine_message_counts(df):
     day_before['period'] = 'Day Before'
     week = message_counts(filter_by_time(df, CURRENT_DATE, -7, -1))
     week['period'] = 'Last Week'
-    #deid = deidentify(pd.concat([yesterday, day_before, week], axis=0))
-    #print(deid[deid['nickname'].isnull()])
-    #deid.drop(['name'], axis=1, inplace=True)
-    #return deid
     return pd.concat([yesterday, day_before, week], axis=0)
 
 def deidentify(df):

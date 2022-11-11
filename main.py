@@ -4,6 +4,7 @@ import re
 import pandas as pd
 from datetime import datetime, date, timedelta
 import csv
+import pygsheets
 
 CURRENT_DATE = date(2022, 10, 6)
 
@@ -77,9 +78,22 @@ def deidentify(df):
     df.drop(['name'], axis=1, inplace=True)
     return df
 
+def update_google_sheets(df):
+    
+    # google sheets authentication
+    filename = os.listdir('auth')[0]
+    creds = os.path.join('auth', filename)
+    api = pygsheets.authorize(service_file=creds)
+    wb = api.open('Tableau test')
+
+    # open the sheet by name
+    sheet = wb.worksheet_by_title(f'Sheet1')
+    sheet.set_dataframe(df, (1,1))
+
 if __name__ == '__main__':
     sent_messages = load_json()
     counts = combine_message_counts(sent_messages)
     deid = deidentify(counts)
     print(deid)
-    deid.to_csv('counts.csv', index=False)
+    #deid.to_csv('counts.csv', index=False)
+    update_google_sheets(deid)

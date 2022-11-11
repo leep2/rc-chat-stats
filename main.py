@@ -95,5 +95,4 @@ if __name__ == '__main__':
     counts = combine_message_counts(sent_messages)
     deid = deidentify(counts)
     print(deid)
-    #deid.to_csv('counts.csv', index=False)
     update_google_sheets(deid)

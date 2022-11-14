@@ -61,13 +61,13 @@ def load_json():
     
 def combine_message_counts(df):
     yesterday = message_counts(filter_by_time(df, CURRENT_DATE, -1, -1))
-    yesterday['period'] = 'Yesterday'
+    yesterday['period'] = 'a. Yesterday'
     day_before = message_counts(filter_by_time(df, CURRENT_DATE, -2, -2))
-    day_before['period'] = 'Day Before'
+    day_before['period'] = 'b. Day Before'
     week = message_counts(filter_by_time(df, CURRENT_DATE, -7, -1))
-    week['period'] = 'Last Week'
+    week['period'] = 'c. Last Week'
     from20220929 = message_counts(df)
-    from20220929['period'] = 'From 9/29/2022 onwards'
+    from20220929['period'] = 'd. From 9/29/2022 onwards'
     return pd.concat([yesterday, day_before, week, from20220929], axis=0)
 
 def deidentify(df):
@@ -90,6 +90,7 @@ def update_google_sheets(df):
 
     # open the sheet by name
     sheet = wb.worksheet_by_title(f'Sheet1')
+    sheet.clear()
     sheet.set_dataframe(df, (1,1))
 
 if __name__ == '__main__':

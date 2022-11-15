@@ -10,9 +10,9 @@ def truncate_timestamp(timestamp_ms):
     dt = datetime.fromtimestamp(timestamp_ms/1000)
     return date(dt.year, dt.month, dt.day)
 
-def filter_by_time(df, current_date = date.today(), begin = None, end = -1):
-    begin_date = current_date + timedelta(begin)
-    end_date = current_date + timedelta(end)
+def filter_by_time(df, latest_date, begin, end):
+    begin_date = latest_date + timedelta(begin)
+    end_date = latest_date + timedelta(end)
     return df[(df['date']>=begin_date) & (df['date']<=end_date)]
     
 def message_counts(df):

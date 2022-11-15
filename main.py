@@ -60,11 +60,13 @@ def load_json():
     return df[df['message_type'] != 'unsent']
     
 def combine_message_counts(df):
-    yesterday = message_counts(filter_by_time(df, CURRENT_DATE, -1, -1))
+    BEGIN_DATE = df['date'].min()
+    END_DATE = df['date'].max()
+    yesterday = message_counts(filter_by_time(df, END_DATE, 0, 0))
     yesterday['period'] = 'a. Yesterday'
-    day_before = message_counts(filter_by_time(df, CURRENT_DATE, -2, -2))
+    day_before = message_counts(filter_by_time(df, END_DATE, -1, -1))
     day_before['period'] = 'b. Day Before'
-    week = message_counts(filter_by_time(df, CURRENT_DATE, -7, -1))
+    week = message_counts(filter_by_time(df, END_DATE, -6, 0))
     week['period'] = 'c. Last Week'
     from20220929 = message_counts(df)
     from20220929['period'] = 'd. From 9/29/2022 onwards'

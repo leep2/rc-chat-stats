@@ -86,7 +86,7 @@ def update_google_sheets(df):
     filename = os.listdir('auth')[0]
     creds = os.path.join('auth', filename)
     api = pygsheets.authorize(service_file=creds)
-    wb = api.open('Tableau test')
+    wb = api.open('RC chat Tableau data')
 
     # open the sheet by name
     sheet = wb.worksheet_by_title(f'Sheet1')

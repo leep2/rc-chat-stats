@@ -61,14 +61,14 @@ def combine_message_counts(df):
     BEGIN_DATE = df['date'].min()
     END_DATE = df['date'].max()
     yesterday = message_counts(filter_by_time(df, END_DATE, 0, 0))
-    yesterday['period'] = 'a. Yesterday'
+    yesterday['period'] = 'a. ' + END_DATE.strftime('%b %d')
     day_before = message_counts(filter_by_time(df, END_DATE, -1, -1))
-    day_before['period'] = 'b. Day Before'
+    day_before['period'] = 'b. ' + (END_DATE + timedelta(-1)).strftime('%b %d')
     week = message_counts(filter_by_time(df, END_DATE, -6, 0))
     week['period'] = 'c. Last Week'
-    from20220929 = message_counts(df)
-    from20220929['period'] = 'd. From 9/29/2022 onwards'
-    return pd.concat([yesterday, day_before, week, from20220929], axis=0)
+    beginning = message_counts(df)
+    beginning['period'] = 'd. From ' + BEGIN_DATE.strftime('%b %d') + ' to date'
+    return pd.concat([yesterday, day_before, week, beginning], axis=0)
 
 def deidentify(df):
     with open('nicknames.csv', mode='r') as infile:

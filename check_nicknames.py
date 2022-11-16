@@ -51,11 +51,16 @@ def check_nick(df):
     with open('nicknames.csv', mode='r') as infile:
         reader = csv.reader(infile)
         names_dict = {rows[0]:rows[1] for rows in reader}
-    with_nicknames = set(names_dict.keys())
-    names = set(df['name'])
-    #print(with_nicknames - names)
-    print(names - with_nicknames)
+    no_nickname = set(df['name']) - set(names_dict.keys())
+    if no_nickname:
+        nickname_file_is_complete = False
+        print(no_nickname)
+    else:
+        nickname_file_is_complete = True
+    return nickname_file_is_complete, names_dict
 
 if __name__ == '__main__':
     sent_messages = load_json()
-    check_nick(sent_messages)
+    nick_file, names_dct = check_nick(sent_messages)
+    print(nick_file)
+    print(names_dct)

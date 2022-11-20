@@ -82,11 +82,7 @@ def combine_message_counts(df):
     beginning['period'] = 'd. From ' + BEGIN_DATE.strftime('%b %d') + ' to date'
     return pd.concat([yesterday, day_before, week, beginning], axis=0)
 
-def deidentify(df, names_dict):
-#    with open('nicknames.csv', mode='r') as infile:
-#        reader = csv.reader(infile)
-#        names_dict = {rows[0]:rows[1] for rows in reader}
-        
+def deidentify(df, names_dict):        
     df['nickname'] = df['name'].map(names_dict)
     print(df[df['nickname'].isnull()])
     df.drop(['name'], axis=1, inplace=True)

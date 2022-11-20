@@ -56,6 +56,18 @@ def load_json():
     df = pd.DataFrame(message_list, columns=['timestamp_ms', 'name', 'message_type', 'count'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     return df[df['message_type'] != 'unsent']
+
+def check_nicknames(df):
+    with open('nicknames.csv', mode='r') as infile:
+        reader = csv.reader(infile)
+        names_dict = {rows[0]:rows[1] for rows in reader}
+    no_nickname = set(df['name']) - set(names_dict.keys())
+    if no_nickname:
+        nickname_file_is_complete = False
+        print(no_nickname)
+    else:
+        nickname_file_is_complete = True
+    return nickname_file_is_complete, names_dict    
     
 def combine_message_counts(df):
     BEGIN_DATE = df['date'].min()
@@ -70,11 +82,7 @@ def combine_message_counts(df):
     beginning['period'] = 'd. From ' + BEGIN_DATE.strftime('%b %d') + ' to date'
     return pd.concat([yesterday, day_before, week, beginning], axis=0)
 
-def deidentify(df):
-    with open('nicknames.csv', mode='r') as infile:
-        reader = csv.reader(infile)
-        names_dict = {rows[0]:rows[1] for rows in reader}
-        
+def deidentify(df, names_dict):        
     df['nickname'] = df['name'].map(names_dict)
     print(df[df['nickname'].isnull()])
     df.drop(['name'], axis=1, inplace=True)
@@ -95,7 +103,9 @@ def update_google_sheets(df):
 
 if __name__ == '__main__':
     sent_messages = load_json()
-    counts = combine_message_counts(sent_messages)
-    deid = deidentify(counts)
-    print(deid)
-    update_google_sheets(deid)
+    nickname_file_is_complete, names_dict = check_nicknames(sent_messages)
+    if nickname_file_is_complete:
+        counts = combine_message_counts(sent_messages)
+        deid = deidentify(counts, names_dict)
+        print(deid)
+        update_google_sheets(deid)

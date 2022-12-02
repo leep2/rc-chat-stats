@@ -29,10 +29,10 @@ def load_json():
             if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
                 pass
             else:
-                if message['is_unsent']:
+                if 'is_unsent' in message and message['is_unsent']:
                     message_type = 'unsent'
                     count = 1
-                if 'content' in message:
+                elif 'content' in message:
                     message_type = 'content'
                     count = len(message['content'].split())
                 elif 'gifs' in message:
@@ -58,7 +58,7 @@ def load_json():
     return df[df['message_type'] != 'unsent']
 
 def check_nicknames(df):
-    with open('nicknames.csv', mode='r') as infile:
+    with open(os.path.join('csv', 'updated_nicknames.csv'), mode='r') as infile:
         reader = csv.reader(infile)
         names_dict = {rows[0]:rows[1] for rows in reader}
     no_nickname = set(df['name']) - set(names_dict.keys())
@@ -77,9 +77,9 @@ def combine_message_counts(df):
     day_before = message_counts(filter_by_time(df, END_DATE, -1, -1))
     day_before['period'] = 'b. ' + (END_DATE + timedelta(-1)).strftime('%b %d')
     week = message_counts(filter_by_time(df, END_DATE, -6, 0))
-    week['period'] = 'c. Last Week'
+    week['period'] = 'c. ' + (END_DATE + timedelta(-6)).strftime('%b %d') + ' to ' + END_DATE.strftime('%b %d')
     beginning = message_counts(df)
-    beginning['period'] = 'd. From ' + BEGIN_DATE.strftime('%b %d') + ' to date'
+    beginning['period'] = 'd. ' + BEGIN_DATE.strftime('%b %d') + ' to date'
     return pd.concat([yesterday, day_before, week, beginning], axis=0)
 
 def deidentify(df, names_dict):        

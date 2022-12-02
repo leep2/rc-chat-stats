@@ -11,18 +11,17 @@ def truncate_timestamp(timestamp_ms):
 def load_json():
     message_list = []
     for filename in os.listdir('json'):
-#    for filename in ['message_1026_1029.json']:    
         with open(os.path.join('json', filename)) as file:
             data = json.load(file)
     
         for message in data['messages']:
             if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
                 pass
-            else:
-                if message['is_unsent']:
+            else:                    
+                if 'is_unsent' in message and message['is_unsent']:
                     message_type = 'unsent'
                     count = 1
-                if 'content' in message:
+                elif 'content' in message:
                     message_type = 'content'
                     count = len(message['content'].split())
                 elif 'gifs' in message:

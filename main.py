@@ -77,9 +77,9 @@ def combine_message_counts(df):
     day_before = message_counts(filter_by_time(df, END_DATE, -1, -1))
     day_before['period'] = 'b. ' + (END_DATE + timedelta(-1)).strftime('%b %d')
     week = message_counts(filter_by_time(df, END_DATE, -6, 0))
-    week['period'] = 'c. Last Week'
+    week['period'] = 'c. ' + (END_DATE + timedelta(-6)).strftime('%b %d') + ' to ' + END_DATE.strftime('%b %d')
     beginning = message_counts(df)
-    beginning['period'] = 'd. From ' + BEGIN_DATE.strftime('%b %d') + ' to date'
+    beginning['period'] = 'd. ' + BEGIN_DATE.strftime('%b %d') + ' to date'
     return pd.concat([yesterday, day_before, week, beginning], axis=0)
 
 def deidentify(df, names_dict):        

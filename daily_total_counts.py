@@ -11,7 +11,6 @@ def truncate_timestamp(timestamp_ms):
 def load_json():
     message_list = []
     for filename in os.listdir('json'):
-#    for filename in ['message_1026_1029.json']:    
         with open(os.path.join('json', filename)) as file:
             data = json.load(file)
     

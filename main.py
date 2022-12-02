@@ -58,7 +58,7 @@ def load_json():
     return df[df['message_type'] != 'unsent']
 
 def check_nicknames(df):
-    with open('nicknames.csv', mode='r') as infile:
+    with open(os.path.join('csv', 'updated_nicknames.csv'), mode='r') as infile:
         reader = csv.reader(infile)
         names_dict = {rows[0]:rows[1] for rows in reader}
     no_nickname = set(df['name']) - set(names_dict.keys())

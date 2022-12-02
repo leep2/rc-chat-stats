@@ -29,10 +29,10 @@ def load_json():
             if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
                 pass
             else:
-                if message['is_unsent']:
+                if 'is_unsent' in message and message['is_unsent']:
                     message_type = 'unsent'
                     count = 1
-                if 'content' in message:
+                elif 'content' in message:
                     message_type = 'content'
                     count = len(message['content'].split())
                 elif 'gifs' in message:

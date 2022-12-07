@@ -49,4 +49,4 @@ def load_json():
 if __name__ == '__main__':
     sent_messages = load_json()
     counts = sent_messages.groupby(['date'])['count'].count()
-    print(counts)
+    print(counts.to_string())

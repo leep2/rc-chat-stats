@@ -4,6 +4,7 @@ import re
 import pandas as pd
 from datetime import datetime, date, timedelta
 import csv
+import configparser
 import pygsheets
 
 def truncate_timestamp(timestamp_ms):
@@ -90,11 +91,14 @@ def deidentify(df, names_dict):
 
 def update_google_sheets(df):
     
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    
     # google sheets authentication
     filename = os.listdir('auth')[0]
     creds = os.path.join('auth', filename)
     api = pygsheets.authorize(service_file=creds)
-    wb = api.open('RC chat Tableau data')
+    wb = api.open(config['DEFAULT']['sheets_filename'])
 
     # open the sheet by name
     sheet = wb.worksheet_by_title(f'Sheet1')

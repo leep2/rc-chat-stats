@@ -18,7 +18,6 @@ def filter_by_time(df, latest_date, begin, end):
     
 def message_counts(df):
     counts = df.groupby(['name', 'message_type'], as_index=False)['count'].count()
-#    return pd.DataFrame({'name':counts.index, 'count':counts.values})
     return counts
 
 def load_json():

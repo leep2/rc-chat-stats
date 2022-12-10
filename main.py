@@ -19,6 +19,9 @@ def filter_by_time(df, latest_date, begin, end):
 def message_counts(df):
     return df.groupby(['name', 'message_type'], as_index=False)['count'].count()
 
+def total_messages(df):
+    return df.groupby(['date'], as_index=False)['count'].count()
+
 def load_json():
     message_list = []
     for filename in os.listdir('json'):
@@ -103,6 +106,24 @@ def update_google_sheets(df):
     sheet = wb.worksheet_by_title(f'Sheet1')
     sheet.clear()
     sheet.set_dataframe(df, (1,1))
+    
+def set_workbook():
+    
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    
+    # google sheets authentication
+    filename = os.listdir('auth')[0]
+    creds = os.path.join('auth', filename)
+    api = pygsheets.authorize(service_file=creds)
+    return api.open(config['DEFAULT']['sheets_filename'])
+
+def update_sheet(wb, sheet_name, df):
+
+    # open the sheet by name
+    sheet = wb.worksheet_by_title(sheet_name)
+    sheet.clear()
+    sheet.set_dataframe(df, (1,1))
 
 if __name__ == '__main__':
     sent_messages = load_json()
@@ -111,4 +132,7 @@ if __name__ == '__main__':
         counts = combine_message_counts(sent_messages)
         deid = deidentify(counts, names_dict)
         print(deid)
-        update_google_sheets(deid)
+        #update_google_sheets(deid)
+        totals = total_messages(sent_messages)
+        workbook = set_workbook()
+        update_sheet(workbook, 'Sheet2', totals)

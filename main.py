@@ -92,7 +92,7 @@ def deidentify(df, names_dict):
     return df
 
 def update_google_sheets(df):
-    
+############################################################################################    
     config = configparser.ConfigParser()
     config.read('config.ini')
     
@@ -131,8 +131,8 @@ if __name__ == '__main__':
     if nickname_file_is_complete:
         counts = combine_message_counts(sent_messages)
         deid = deidentify(counts, names_dict)
-        print(deid)
-        #update_google_sheets(deid)
         totals = total_messages(sent_messages)
+        
         workbook = set_workbook()
-        update_sheet(workbook, 'Sheet2', totals)
+        update_sheet(workbook, 'Member messages', deid)
+        update_sheet(workbook, 'Total messages', totals)

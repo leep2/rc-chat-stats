@@ -90,22 +90,6 @@ def deidentify(df, names_dict):
     print(df[df['nickname'].isnull()])
     df.drop(['name'], axis=1, inplace=True)
     return df
-
-def update_google_sheets(df):
-############################################################################################    
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    
-    # google sheets authentication
-    filename = os.listdir('auth')[0]
-    creds = os.path.join('auth', filename)
-    api = pygsheets.authorize(service_file=creds)
-    wb = api.open(config['DEFAULT']['sheets_filename'])
-
-    # open the sheet by name
-    sheet = wb.worksheet_by_title(f'Sheet1')
-    sheet.clear()
-    sheet.set_dataframe(df, (1,1))
     
 def set_workbook():
     

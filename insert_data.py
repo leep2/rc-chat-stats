@@ -22,8 +22,8 @@ if __name__ == '__main__':
                                 count = 1
                             elif 'content' in message:
                                 message_type = 'content'
-                                count = len(message['content'].split())
                                 content = message['content'].encode('latin1').decode('utf8')
+                                count = len(content.split())
                             elif 'gifs' in message:
                                 message_type = 'gifs'
                                 count = len(message['gifs'])

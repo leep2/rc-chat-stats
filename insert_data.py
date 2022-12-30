@@ -15,6 +15,10 @@ if __name__ == '__main__':
                     for message in data['messages']:
                         if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
                             pass
+                        elif 'content' in message and re.search('^.*set the nickname for.*to.*$', message['content']):
+                            pass
+                        elif 'content' in message and re.search('^.*set your nickname to.*$', message['content']):
+                            pass
                         else:
                             content = None
                             if 'is_unsent' in message and message['is_unsent']:

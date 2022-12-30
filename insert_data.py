@@ -5,7 +5,7 @@ import json
 import re
 
 if __name__ == '__main__':
-    with closing(sqlite3.connect('messages.db')) as connection:
+    with closing(sqlite3.connect('rc_chat_log.db')) as connection:
         with closing(connection.cursor()) as cursor:
 
             for filename in os.listdir('json'):

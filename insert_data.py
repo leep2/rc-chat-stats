@@ -45,16 +45,58 @@ if __name__ == '__main__':
                                 count = 1
 
                             name = message['sender_name']
-                            name_id_result = cursor.execute("SELECT name_id FROM names WHERE name = ?", (name,)).fetchone()
+                            name_id_result = cursor.execute("   \
+                                SELECT                          \
+                                    name_id                     \
+                                FROM                            \
+                                    names                       \
+                                WHERE                           \
+                                    name = ?                    \
+                                ", (name,)).fetchone()
                             if not name_id_result:
-                                cursor.execute("INSERT INTO names (name) VALUES (?)", (name,))
-                                name_id_result = cursor.execute("SELECT name_id FROM names WHERE name = ?", (name,)).fetchone()
+                                cursor.execute("                \
+                                    INSERT INTO names (name)    \
+                                    VALUES                      \
+                                        (?)                     \
+                                    ", (name,))
+                                name_id_result = cursor.execute("   \
+                                    SELECT                          \
+                                        name_id                     \
+                                    FROM                            \
+                                        names                       \
+                                    WHERE                           \
+                                        name = ?                    \
+                                    ", (name,)).fetchone()
                             
-                            message_type_id_result = cursor.execute('SELECT message_type_id FROM message_types WHERE message_type = ?', (message_type,)).fetchone()
+                            message_type_id_result = cursor.execute("   \
+                                SELECT                                  \
+                                    message_type_id                     \
+                                FROM                                    \
+                                    message_types                       \
+                                WHERE                                   \
+                                    message_type = ?                    \
+                                ", (message_type,)).fetchone()
                             if not message_type_id_result:
-                                cursor.execute("INSERT INTO message_types (message_type) VALUES (?)", (message_type,))
-                                message_type_id_result = cursor.execute('SELECT message_type_id FROM message_types WHERE message_type = ?', (message_type,)).fetchone()
+                                cursor.execute("                                \
+                                    INSERT INTO message_types (message_type)    \
+                                    VALUES                                      \
+                                        (?)", (message_type,))
+                                message_type_id_result = cursor.execute("   \
+                                    SELECT                                  \
+                                        message_type_id                     \
+                                    FROM                                    \
+                                        message_types                       \
+                                    WHERE                                   \
+                                        message_type = ?                    \
+                                    ", (message_type,)).fetchone()
                             
-                            cursor.execute("INSERT INTO messages (name_id, message_type_id, timestamp_ms, item_count, content) VALUES (?, ?, ?, ?, ?)", (name_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
+                            cursor.execute("                                \
+                                INSERT INTO messages (                      \
+                                    name_id, message_type_id, timestamp_ms, \
+                                    item_count, content                     \
+                                )                                           \
+                                VALUES                                      \
+                                    (?, ?, ?, ?, ?)                         \
+                                ", (name_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
 
         connection.commit()

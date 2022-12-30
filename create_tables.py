@@ -19,7 +19,7 @@ if __name__ == '__main__':
                                 name_id INTEGER NOT NULL,                                                   \
                                 message_type_id INTEGER NOT NULL,                                           \
                                 timestamp_ms INTEGER NOT NULL,                                              \
-                                count INTEGER NOT NULL,                                                     \
+                                item_count INTEGER NOT NULL,                                                \
                                 content TEXT,                                                               \
                                 FOREIGN KEY (name_id) REFERENCES names (name_id),                           \
                                 FOREIGN KEY (message_type_id) REFERENCES message_types (message_type_id))")

@@ -51,6 +51,6 @@ if __name__ == '__main__':
                                 cursor.execute("INSERT INTO message_types (message_type) VALUES (?)", (message_type,))
                                 message_type_id_result = cursor.execute('SELECT message_type_id FROM message_types WHERE message_type = ?', (message_type,)).fetchone()
                             
-                            cursor.execute("INSERT INTO messages (name_id, message_type_id, timestamp_ms, count, content) VALUES (?, ?, ?, ?, ?)", (name_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
+                            cursor.execute("INSERT INTO messages (name_id, message_type_id, timestamp_ms, item_count, content) VALUES (?, ?, ?, ?, ?)", (name_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
 
         connection.commit()

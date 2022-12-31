@@ -1,3 +1,5 @@
+import sqlite3
+from contextlib import closing
 import os
 import json
 import re
@@ -11,12 +13,35 @@ def truncate_timestamp(timestamp_ms):
     dt = datetime.fromtimestamp(timestamp_ms/1000)
     return date(dt.year, dt.month, dt.day)
 
+def get_messages():
+    
+    with closing(sqlite3.connect('rc_chat_log.db')) as connection:
+        with closing(connection.cursor()) as cursor:
+
+            messages = cursor.execute("                                                             \
+                SELECT                                                                              \
+                    name,                                                                           \
+                    message_type,                                                                   \
+                    timestamp_ms                                                                    \
+                FROM                                                                                \
+                    messages                                                                        \
+                    JOIN message_types ON messages.message_type_id = message_types.message_type_id  \
+                    JOIN names ON messages.name_id = names.name_id                                  \
+                WHERE message_type != 'unsent'                                                      \
+                ").fetchall()
+            
+    df = pd.DataFrame(messages, columns=['name', 'message_type', 'timestamp_ms'])
+    df['date'] = df['timestamp_ms'].map(truncate_timestamp)
+    df.drop(columns=['timestamp_ms'], inplace=True)
+    return df
+
 def filter_by_time(df, latest_date, begin, end):
     begin_date = latest_date + timedelta(begin)
     end_date = latest_date + timedelta(end)
     return df[(df['date']>=begin_date) & (df['date']<=end_date)]
     
 def message_counts(df):
+    print(df)
     return df.groupby(['name', 'message_type'], as_index=False)['count'].count()
 
 def total_messages(df):
@@ -110,13 +135,16 @@ def update_sheet(wb, sheet_name, df):
     sheet.set_dataframe(df, (1,1))
 
 if __name__ == '__main__':
-    sent_messages = load_json()
-    nickname_file_is_complete, names_dict = check_nicknames(sent_messages)
+#    messages = get_messages()
+    messages = load_json()
+    nickname_file_is_complete, names_dict = check_nicknames(messages)
     if nickname_file_is_complete:
-        counts = combine_message_counts(sent_messages)
+        counts = combine_message_counts(messages)
         deid = deidentify(counts, names_dict)
-        totals = total_messages(sent_messages)
+        totals = total_messages(messages)
+        print(deid)
+        print(totals)
         
-        workbook = set_workbook()
-        update_sheet(workbook, 'Member messages', deid)
-        update_sheet(workbook, 'Total messages', totals)
+#        workbook = set_workbook()
+#        update_sheet(workbook, 'Member messages', deid)
+#        update_sheet(workbook, 'Total messages', totals)

@@ -4,6 +4,7 @@ import os
 import json
 import re
 import pandas as pd
+import time
 from datetime import datetime, date, timedelta
 import csv
 import configparser
@@ -31,6 +32,8 @@ def get_messages():
                 ").fetchall()
             
     df = pd.DataFrame(messages, columns=['name', 'message_type', 'timestamp_ms'])
+    os.environ['TZ'] = 'America/Chicago'
+    time.tzset()
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     df.drop(columns=['timestamp_ms'], inplace=True)
     return df
@@ -149,8 +152,6 @@ if __name__ == '__main__':
         counts = combine_message_counts(messages)
         deid = deidentify(counts, names_dict)
         totals = total_messages(messages)
-        #print(deid)
-        #print(totals)
         
         workbook = set_workbook()
         update_sheet(workbook, 'Member messages', deid)

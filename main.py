@@ -48,44 +48,6 @@ def total_messages(df):
     df.drop(columns=['name'], inplace=True)
     return df.groupby(['date'], as_index=False).count()
 
-def load_json():
-    message_list = []
-    for filename in os.listdir('json'):
-        with open(os.path.join('json', filename)) as file:
-            data = json.load(file)
-    
-        for message in data['messages']:
-            if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
-                pass
-            else:
-                if 'is_unsent' in message and message['is_unsent']:
-                    message_type = 'unsent'
-                    count = 1
-                elif 'content' in message:
-                    message_type = 'content'
-                    count = len(message['content'].split())
-                elif 'gifs' in message:
-                    message_type = 'gifs'
-                    count = len(message['gifs'])
-                elif 'photos' in message:
-                    message_type = 'photos'
-                    count = len(message['photos'])
-                elif 'audio_files' in message:
-                    message_type = 'audio_files'
-                    count = len(message['audio_files'])
-                elif 'videos' in message:
-                    message_type = 'videos'
-                    count = len(message['videos'])
-                elif 'sticker' in message:
-                    message_type = 'sticker'
-                    count = 1
-                new_row = [message['timestamp_ms'], message['sender_name'], message_type, count]
-                message_list.append(new_row)
-            
-    df = pd.DataFrame(message_list, columns=['timestamp_ms', 'name', 'message_type', 'count'])
-    df['date'] = df['timestamp_ms'].map(truncate_timestamp)
-    return df[df['message_type'] != 'unsent']
-
 def check_nicknames(df):
     with open(os.path.join('csv', 'updated_nicknames.csv'), mode='r') as infile:
         reader = csv.reader(infile)

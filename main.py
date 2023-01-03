@@ -1,11 +1,9 @@
+from datetime import datetime, date, timedelta
 import sqlite3
 from contextlib import closing
-import os
-import json
-import re
 import pandas as pd
+import os
 import time
-from datetime import datetime, date, timedelta
 import csv
 import configparser
 import pygsheets

@@ -42,17 +42,10 @@ def filter_by_time(df, latest_date, begin, end):
     return df[(df['date']>=begin_date) & (df['date']<=end_date)]
     
 def message_counts(df):
-    #print(df.groupby(['name', 'message_type'])['date'].count())
-    #blah['message_count'] = blah.groupby(['name', 'message_type'])['name'].transform('count')
-    #df.groupby(['name', 'message_type']).count().to_csv('blah.csv')
-    #blah.to_csv('blah.csv')
     return df.groupby(['name', 'message_type'], as_index=False).count()
 
 def total_messages(df):
-    #df.groupby(['date'], as_index=False).count().to_csv('blah.csv')
     df.drop(columns=['name'], inplace=True)
-    #df.groupby(['date'], as_index=False).count().to_csv('blah.csv')
-    #print(df.groupby(['date'], as_index=False).count())
     return df.groupby(['date'], as_index=False).count()
 
 def load_json():
@@ -144,7 +137,6 @@ def update_sheet(wb, sheet_name, df):
 
 if __name__ == '__main__':
     messages = get_messages()
-#    messages = load_json()
     nickname_file_is_complete, names_dict = check_nicknames(messages)
     if nickname_file_is_complete:
         counts = combine_message_counts(messages)

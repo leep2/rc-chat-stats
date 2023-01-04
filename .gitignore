@@ -2,3 +2,4 @@ auth
 csv
 env
 json
+*.db

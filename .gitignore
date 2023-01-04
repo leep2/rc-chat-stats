@@ -2,4 +2,5 @@ auth
 csv
 env
 json
+config.ini
 *.db

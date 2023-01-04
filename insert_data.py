@@ -3,10 +3,21 @@ from contextlib import closing
 import os
 import json
 import re
+from date_handling import truncate_timestamp
 
 if __name__ == '__main__':
     with closing(sqlite3.connect('rc_chat_log.db')) as connection:
         with closing(connection.cursor()) as cursor:
+            
+            file_dates = set()
+            for filename in os.listdir('json'):
+                if filename != 'loaded':
+                    with open(os.path.join('json', filename)) as file:
+                        data = json.load(file)
+                        
+                        for message in data['messages']:
+                            file_dates.add(truncate_timestamp(message['timestamp_ms']))
+            print(file_dates)
 
             for filename in os.listdir('json'):
                 if filename != 'loaded':

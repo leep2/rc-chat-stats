@@ -32,12 +32,17 @@ def check_data_file(cursor):
         is_data_new = True
     else:
         print('Dates already loaded into database:')
-        for item in db_dates.intersection(file_dates):
-            print(item.strftime('%Y-%m-%d'))
+        for dt in db_dates.intersection(file_dates):
+            print(dt.strftime('%Y-%m-%d'))
         is_data_new = False
     return is_data_new, db_dates, file_dates
 
-def insert_data():
+def confirm_data_load(db_dates, file_dates):
+    print('Dates loaded:')
+    for dt in file_dates:
+        print(dt.strftime('%Y-%m-%d'))
+
+def load_data():
     
     with closing(sqlite3.connect('rc_chat_log.db')) as connection:
         with closing(connection.cursor()) as cursor:
@@ -140,7 +145,8 @@ def insert_data():
                                             (?, ?, ?, ?, ?)                         \
                                         ", (name_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
 
-        connection.commit()
+                connection.commit()
+                confirm_data_load(db_dates, file_dates)
         
 if __name__ == '__main__':
-    insert_data()
+    load_data()

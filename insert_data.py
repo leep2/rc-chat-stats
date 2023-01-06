@@ -29,11 +29,13 @@ def check_data_file(cursor):
                     file_dates.add(truncate_timestamp(message['timestamp_ms']))
                         
     if db_dates.isdisjoint(file_dates):
-        return True
-    print('Dates already loaded into database:')
-    for item in db_dates.intersection(file_dates):
-        print(item.strftime('%Y-%m-%d'))
-    return False    
+        is_data_new = True
+    else:
+        print('Dates already loaded into database:')
+        for item in db_dates.intersection(file_dates):
+            print(item.strftime('%Y-%m-%d'))
+        is_data_new = False
+    return is_data_new, db_dates, file_dates
 
 def insert_data():
     
@@ -43,7 +45,8 @@ def insert_data():
             os.environ['TZ'] = 'America/Chicago'
             time.tzset()
 
-            if check_data_file(cursor):
+            is_data_new, db_dates, file_dates = check_data_file(cursor)
+            if is_data_new:
     
                 for filename in os.listdir('json'):
                     if filename != 'loaded':

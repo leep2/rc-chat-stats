@@ -18,7 +18,6 @@ def check_data_file(cursor):
     df = pd.DataFrame(db_timestamps, columns=['timestamp_ms'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     db_dates = df['date'].unique()
-    print(db_dates)
             
     file_dates = set()
     for filename in os.listdir('json'):
@@ -28,14 +27,13 @@ def check_data_file(cursor):
                         
                 for message in data['messages']:
                     file_dates.add(truncate_timestamp(message['timestamp_ms']))
-    print(file_dates)
-    print(not file_dates.isdisjoint(db_dates))
-    if not file_dates.isdisjoint(db_dates):
-        print('Dates already loaded into database:')
-        for item in file_dates.intersection(db_dates):
-            print(item.strftime('%Y-%m-%d'))
-        return False
-    return True        
+    
+    if file_dates.isdisjoint(db_dates):
+        return True        
+    print('Dates already loaded into database:')
+    for item in file_dates.intersection(db_dates):
+        print(item.strftime('%Y-%m-%d'))
+    return False    
 
 def insert_data():
     

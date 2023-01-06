@@ -2,5 +2,6 @@ auth
 csv
 env
 json
+__pycache__
 config.ini
 *.db

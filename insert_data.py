@@ -44,28 +44,6 @@ def insert_data():
             
             os.environ['TZ'] = 'America/Chicago'
             time.tzset()
-            
-#            db_timestamps = cursor.execute("    \
-#                SELECT                          \
-#                    timestamp_ms                \
-#                FROM                            \
-#                    messages                    \
-#                ").fetchall()
-#            df = pd.DataFrame(db_timestamps, columns=['timestamp_ms'])
-#            df['date'] = df['timestamp_ms'].map(truncate_timestamp)
-#            db_dates = df['date'].unique()
-#            print(db_dates)
-            
-#            file_dates = set()
-#            for filename in os.listdir('json'):
-#                if filename != 'loaded':
-#                    with open(os.path.join('json', filename)) as file:
-#                        data = json.load(file)
-                        
-#                        for message in data['messages']:
-#                            file_dates.add(truncate_timestamp(message['timestamp_ms']))
-#            print(file_dates)
-#            print(not file_dates.isdisjoint(db_dates))
 
             if check_data_file(cursor):
     

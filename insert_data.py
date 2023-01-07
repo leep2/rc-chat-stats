@@ -15,8 +15,7 @@ def handle_zip_file():
             for item in lst:
                 if re.search('^.*/ccsfrelationships_.*/message_1.json$', item):
                     print(item)
-                    zip.extract('blah')
-                    print('flag')
+                    zip.extract(item)
     
 
 def check_data_file(cursor):

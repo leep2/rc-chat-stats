@@ -2,10 +2,22 @@ import sqlite3
 from contextlib import closing
 import os
 import time
+from zipfile import ZipFile
 import pandas as pd
 from date_handling import truncate_timestamp
 import json
 import re
+
+def handle_zip_file():
+    for filename in os.listdir('zip'):
+        with ZipFile(os.path.join('zip', filename)) as zip:
+            lst = zip.namelist()
+            for item in lst:
+                if re.search('^.*/ccsfrelationships_.*/message_1.json$', item):
+                    print(item)
+                    zip.extract('blah')
+                    print('flag')
+    
 
 def check_data_file(cursor):
     
@@ -163,4 +175,5 @@ def load_data():
                 confirm_data_load(db_dates, file_dates)
         
 if __name__ == '__main__':
-    load_data()
+    #load_data()
+    handle_zip_file()

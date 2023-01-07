@@ -35,10 +35,24 @@ def check_data_file(cursor):
         for dt in db_dates.intersection(file_dates):
             print(dt.strftime('%Y-%m-%d'))
         is_data_new = False
+        
     return is_data_new, db_dates, file_dates
 
 def confirm_data_load(db_dates, file_dates):
-    print('Dates loaded:')
+    
+    if len(db_dates) > 0:
+    
+        begin = min(db_dates)
+        end = max(db_dates)
+
+        print('Dates in database:')
+        if (end - begin).days + 1 == len(db_dates):
+            print(begin.strftime('%Y-%m-%d') + ' to ' + end.strftime('%Y-%m-%d'))
+        else:
+            for dt in db_dates:
+                print(dt.strftime('%Y-%m-%d'))
+    
+    print('\nDates loaded:')
     for dt in file_dates:
         print(dt.strftime('%Y-%m-%d'))
 

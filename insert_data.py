@@ -9,14 +9,32 @@ import json
 import re
 
 def handle_zip_file():
+    
     for filename in os.listdir('zip'):
         with ZipFile(os.path.join('zip', filename)) as zip:
             lst = zip.namelist()
+
             for item in lst:
                 if re.search('^.*/ccsfrelationships_.*/message_1.json$', item):
-                    print(item)
-                    zip.extract(item)
-    
+                    break
+
+            print(item)        
+            zip.extract(item)                    
+            with open(item) as file:                    
+                data = json.load(file)
+                
+            file_dates = set()
+            for message in data['messages']:
+                file_dates.add(truncate_timestamp(message['timestamp_ms']))
+            
+            begin = min(file_dates)
+            end = max(file_dates)
+            if begin == end:
+                file_suffix = end.strftime('%Y%m%d')
+            else:
+                file_suffix = begin.strftime('%Y%m%d') + '_' + end.strftime('%Y%m%d')
+            print('message_' + file_suffix + '.json')
+            os.system('mv ' + item + ' json/message_' + file_suffix + '.json')
 
 def check_data_file(cursor):
     

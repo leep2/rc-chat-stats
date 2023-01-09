@@ -37,8 +37,8 @@ def handle_zip_file():
             os.system('mv ' + item + ' json/message_' + file_suffix + '.json')
             os.system('rm -r ' + item[:item.find('/')])
 
-        print('Extracted from zip file(s) to json folder')
         os.system('rm zip/*.zip')
+        print('Extracted from zip file(s) to json folder')
 
 def check_data_file(cursor):
     

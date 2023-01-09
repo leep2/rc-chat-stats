@@ -2,12 +2,49 @@ import sqlite3
 from contextlib import closing
 import os
 import time
+from zipfile import ZipFile
 import pandas as pd
 from date_handling import truncate_timestamp
 import json
 import re
 
+def handle_zip_file():
+    
+    if len(os.listdir('zip')) > 0:
+    
+        for filename in os.listdir('zip'):
+            with ZipFile(os.path.join('zip', filename)) as zip:
+                lst = zip.namelist()
+
+                for item in lst:
+                    if re.search('^.*/ccsfrelationships_.*/message_1.json$', item):
+                        break
+                zip.extract(item)
+
+            with open(item) as file:                    
+                data = json.load(file)
+
+            file_dates = set()
+            for message in data['messages']:
+                file_dates.add(truncate_timestamp(message['timestamp_ms']))
+
+            begin = min(file_dates)
+            end = max(file_dates)
+            if begin == end:
+                file_suffix = end.strftime('%Y%m%d')
+            else:
+                file_suffix = begin.strftime('%Y%m%d') + '_' + end.strftime('%Y%m%d')
+            os.system('mv ' + item + ' json/message_' + file_suffix + '.json')
+            os.system('rm -r ' + item[:item.find('/')])
+
+        os.system('rm zip/*.zip')
+        print('Extracted from zip file(s) to json folder')
+
 def check_data_file(cursor):
+    
+    if len(os.listdir('json')) == 1:
+        print('Json folder is empty')
+        return False, set(), set()
     
     db_timestamps = cursor.execute("    \
         SELECT                          \
@@ -27,7 +64,7 @@ def check_data_file(cursor):
                         
                 for message in data['messages']:
                     file_dates.add(truncate_timestamp(message['timestamp_ms']))
-                        
+    
     if db_dates.isdisjoint(file_dates):
         is_data_new = True
     else:
@@ -35,7 +72,7 @@ def check_data_file(cursor):
         for dt in db_dates.intersection(file_dates):
             print(dt.strftime('%Y-%m-%d'))
         is_data_new = False
-        
+    
     return is_data_new, db_dates, file_dates
 
 def confirm_data_load(db_dates, file_dates):
@@ -55,8 +92,11 @@ def confirm_data_load(db_dates, file_dates):
     print('\nDates loaded:')
     for dt in file_dates:
         print(dt.strftime('%Y-%m-%d'))
+    os.system('mv json/*.json json/loaded/')
 
 def load_data():
+    
+    handle_zip_file()
     
     with closing(sqlite3.connect('rc_chat_log.db')) as connection:
         with closing(connection.cursor()) as cursor:

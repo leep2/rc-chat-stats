@@ -33,6 +33,7 @@ def handle_zip_file():
         else:
             file_suffix = begin.strftime('%Y%m%d') + '_' + end.strftime('%Y%m%d')
         os.system('mv ' + item + ' json/message_' + file_suffix + '.json')
+        os.system('rm -r ' + item[:item.find('/')])
 
 def check_data_file(cursor):
     

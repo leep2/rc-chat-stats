@@ -2,6 +2,7 @@ auth
 csv
 env
 json
+zip
 __pycache__
 config.ini
 *.db

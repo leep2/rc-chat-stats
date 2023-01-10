@@ -34,10 +34,10 @@ def handle_zip_file():
                 file_suffix = end.strftime('%Y%m%d')
             else:
                 file_suffix = begin.strftime('%Y%m%d') + '_' + end.strftime('%Y%m%d')
-            os.system('mv ' + item + ' json/message_' + file_suffix + '.json')
+            os.system('mv ' + item + os.path.join(' json', 'message_') + file_suffix + '.json')
             os.system('rm -r ' + item[:item.find('/')])
 
-        os.system('rm zip/*.zip')
+        os.system('rm ' + os.path.join('zip', '*.zip'))
         print('Extracted from zip file(s) to json folder')
 
 def check_data_file(cursor):
@@ -92,7 +92,7 @@ def confirm_data_load(db_dates, file_dates):
     print('\nDates loaded:')
     for dt in file_dates:
         print(dt.strftime('%Y-%m-%d'))
-    os.system('mv json/*.json json/loaded/')
+    os.system('mv ' + os.path.join('json', '*.json') + ' ' + os.path.join('json', 'loaded'))
 
 def load_data():
     

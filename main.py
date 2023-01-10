@@ -1,40 +1,13 @@
 from datetime import datetime, date, timedelta
 import sqlite3
 from contextlib import closing
+from db_functions import load_data, get_messages
 import pandas as pd
 import os
 import time
 import csv
 import configparser
 import pygsheets
-
-def truncate_timestamp(timestamp_ms):
-    dt = datetime.fromtimestamp(timestamp_ms/1000)
-    return date(dt.year, dt.month, dt.day)
-
-def get_messages():
-    
-    with closing(sqlite3.connect('rc_chat_log.db')) as connection:
-        with closing(connection.cursor()) as cursor:
-
-            messages = cursor.execute("                                                             \
-                SELECT                                                                              \
-                    name,                                                                           \
-                    message_type,                                                                   \
-                    timestamp_ms                                                                    \
-                FROM                                                                                \
-                    messages                                                                        \
-                    JOIN message_types ON messages.message_type_id = message_types.message_type_id  \
-                    JOIN names ON messages.name_id = names.name_id                                  \
-                WHERE message_type != 'unsent'                                                      \
-                ").fetchall()
-            
-    df = pd.DataFrame(messages, columns=['name', 'message_type', 'timestamp_ms'])
-    os.environ['TZ'] = 'America/Chicago'
-    time.tzset()
-    df['date'] = df['timestamp_ms'].map(truncate_timestamp)
-    df.drop(columns=['timestamp_ms'], inplace=True)
-    return df
 
 def filter_by_time(df, latest_date, begin, end):
     begin_date = latest_date + timedelta(begin)
@@ -98,13 +71,22 @@ def update_sheet(wb, sheet_name, df):
     sheet.set_dataframe(df, (1,1))
 
 if __name__ == '__main__':
-    messages = get_messages()
+    
+    os.environ['TZ'] = 'America/Chicago'
+    time.tzset()
+    
+    with closing(sqlite3.connect('rc_chat_log.db')) as connection:
+        with closing(connection.cursor()) as cursor:
+            load_data(connection, cursor)
+            messages = get_messages(cursor)
+
     nickname_file_is_complete, names_dict = check_nicknames(messages)
     if nickname_file_is_complete:
         counts = combine_message_counts(messages)
         deid = deidentify(counts, names_dict)
         totals = total_messages(messages)
-        
+
         workbook = set_workbook()
         update_sheet(workbook, 'Member messages', deid)
         update_sheet(workbook, 'Total messages', totals)
+        print('Writing to Google Sheets')

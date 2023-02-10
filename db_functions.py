@@ -135,29 +135,29 @@ def load_data(connection, cursor):
                             message_type = 'sticker'
                             count = 1
 
-                        name = message['sender_name']
-                        name_id_result = cursor.execute("   \
-                            SELECT                          \
-                                name_id                     \
-                            FROM                            \
-                                names                       \
-                            WHERE                           \
-                                name = ?                    \
-                            ", (name,)).fetchone()
-                        if not name_id_result:
-                            cursor.execute("                \
-                                INSERT INTO names (name)    \
-                                VALUES                      \
-                                    (?)                     \
-                                ", (name,))
-                            name_id_result = cursor.execute("   \
-                                SELECT                          \
-                                    name_id                     \
-                                FROM                            \
-                                    names                       \
-                                WHERE                           \
-                                    name = ?                    \
-                                ", (name,)).fetchone()
+                        username = message['sender_name']
+                        username_id_result = cursor.execute("   \
+                            SELECT                              \
+                                username_id                     \
+                            FROM                                \
+                                usernames                       \
+                            WHERE                               \
+                                username = ?                    \
+                            ", (username,)).fetchone()
+                        if not username_id_result:
+                            cursor.execute("                        \
+                                INSERT INTO usernames (username)    \
+                                VALUES                              \
+                                    (?)                             \
+                                ", (username,))
+                            username_id_result = cursor.execute("   \
+                                SELECT                              \
+                                    username_id                     \
+                                FROM                                \
+                                    usernames                       \
+                                WHERE                               \
+                                    username = ?                    \
+                                ", (username,)).fetchone()
 
                         message_type_id_result = cursor.execute("   \
                             SELECT                                  \
@@ -183,12 +183,12 @@ def load_data(connection, cursor):
 
                         cursor.execute("                                \
                             INSERT INTO messages (                      \
-                                name_id, message_type_id, timestamp_ms, \
+                                username_id, message_type_id, timestamp_ms, \
                                 item_count, content                     \
                             )                                           \
                             VALUES                                      \
                                 (?, ?, ?, ?, ?)                         \
-                            ", (name_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
+                            ", (username_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
 
         connection.commit()
         confirm_data_load(db_dates, file_dates)
@@ -197,17 +197,17 @@ def get_messages(cursor):
     
     messages = cursor.execute("                                                             \
         SELECT                                                                              \
-            name,                                                                           \
+            username,                                                                           \
             message_type,                                                                   \
             timestamp_ms                                                                    \
         FROM                                                                                \
             messages                                                                        \
             JOIN message_types ON messages.message_type_id = message_types.message_type_id  \
-            JOIN names ON messages.name_id = names.name_id                                  \
+            JOIN usernames ON messages.username_id = usernames.username_id                                  \
         WHERE message_type != 'unsent'                                                      \
             ").fetchall()
             
-    df = pd.DataFrame(messages, columns=['name', 'message_type', 'timestamp_ms'])
+    df = pd.DataFrame(messages, columns=['username', 'message_type', 'timestamp_ms'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     df.drop(columns=['timestamp_ms'], inplace=True)
     return df

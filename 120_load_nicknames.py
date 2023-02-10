@@ -11,6 +11,13 @@ with closing(sqlite3.connect('rc_chat_log.db')) as connection:
     with closing (connection.cursor()) as cursor:
         
         for username in usernames:
-            cursor.execute("UPDATE usernames SET nickname = ? WHERE username = ?", (username[1], username[0]))
+            cursor.execute("        \
+                UPDATE              \
+                    usernames       \
+                SET                 \
+                    nickname = ?    \
+                WHERE               \
+                    username = ?    \
+                ", (username[1], username[0]))
 
         connection.commit()

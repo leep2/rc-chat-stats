@@ -197,7 +197,7 @@ def get_messages(cursor):
     
     messages = cursor.execute("                                                             \
         SELECT                                                                              \
-            username,                                                                           \
+            nickname,                                                                           \
             message_type,                                                                   \
             timestamp_ms                                                                    \
         FROM                                                                                \

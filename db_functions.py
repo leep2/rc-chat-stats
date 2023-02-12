@@ -207,7 +207,7 @@ def get_messages(cursor):
         WHERE message_type != 'unsent'                                                      \
             ").fetchall()
             
-    df = pd.DataFrame(messages, columns=['name', 'message_type', 'timestamp_ms'])
+    df = pd.DataFrame(messages, columns=['nickname', 'message_type', 'timestamp_ms'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     df.drop(columns=['timestamp_ms'], inplace=True)
     return df

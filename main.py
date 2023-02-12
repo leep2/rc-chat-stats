@@ -80,13 +80,13 @@ if __name__ == '__main__':
             load_data(connection, cursor)
             messages = get_messages(cursor)
 
-    nickname_file_is_complete, names_dict = check_nicknames(messages)
-    if nickname_file_is_complete:
-        counts = combine_message_counts(messages)
-        deid = deidentify(counts, names_dict)
-        totals = total_messages(messages)
+    #nickname_file_is_complete, names_dict = check_nicknames(messages)
+    #if nickname_file_is_complete:
+    counts = combine_message_counts(messages)
+        #deid = deidentify(counts, names_dict)
+    totals = total_messages(messages)
 
-        workbook = set_workbook()
-        update_sheet(workbook, 'Member messages', deid)
-        update_sheet(workbook, 'Total messages', totals)
-        print('Writing to Google Sheets')
+    workbook = set_workbook()
+    update_sheet(workbook, 'Member messages', counts)
+    update_sheet(workbook, 'Total messages', totals)
+    print('Writing to Google Sheets')

@@ -15,10 +15,10 @@ def filter_by_time(df, latest_date, begin, end):
     return df[(df['date']>=begin_date) & (df['date']<=end_date)]
     
 def message_counts(df):
-    return df.groupby(['name', 'message_type'], as_index=False).count()
+    return df.groupby(['nickname', 'message_type'], as_index=False).count()
 
 def total_messages(df):
-    df.drop(columns=['name'], inplace=True)
+    df.drop(columns=['nickname'], inplace=True)
     return df.groupby(['date'], as_index=False).count()
 
 def check_nicknames(df):

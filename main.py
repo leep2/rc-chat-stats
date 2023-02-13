@@ -5,7 +5,6 @@ from db_functions import load_data, get_messages
 import pandas as pd
 import os
 import time
-import csv
 import configparser
 import pygsheets
 
@@ -20,18 +19,6 @@ def message_counts(df):
 def total_messages(df):
     df.drop(columns=['nickname'], inplace=True)
     return df.groupby(['date'], as_index=False).count()
-
-def check_nicknames(df):
-    with open(os.path.join('csv', 'updated_nicknames.csv'), mode='r') as infile:
-        reader = csv.reader(infile)
-        names_dict = {rows[0]:rows[1] for rows in reader}
-    no_nickname = set(df['name']) - set(names_dict.keys())
-    if no_nickname:
-        nickname_file_is_complete = False
-        print(no_nickname)
-    else:
-        nickname_file_is_complete = True
-    return nickname_file_is_complete, names_dict    
     
 def combine_message_counts(df):
     BEGIN_DATE = df['date'].min()
@@ -45,12 +32,6 @@ def combine_message_counts(df):
     beginning = message_counts(df)
     beginning['period'] = 'd. ' + BEGIN_DATE.strftime('%b %d') + ' to date'
     return pd.concat([yesterday, day_before, week, beginning], axis=0)
-
-def deidentify(df, names_dict):        
-    df['nickname'] = df['name'].map(names_dict)
-    print(df[df['nickname'].isnull()])
-    df.drop(['name'], axis=1, inplace=True)
-    return df
     
 def set_workbook():
     

@@ -181,13 +181,13 @@ def load_data(connection, cursor):
                                     message_type = ?                    \
                                 ", (message_type,)).fetchone()
 
-                        cursor.execute("                                \
-                            INSERT INTO messages (                      \
+                        cursor.execute("                                    \
+                            INSERT INTO messages (                          \
                                 username_id, message_type_id, timestamp_ms, \
-                                item_count, content                     \
-                            )                                           \
-                            VALUES                                      \
-                                (?, ?, ?, ?, ?)                         \
+                                item_count, content                         \
+                            )                                               \
+                            VALUES                                          \
+                                (?, ?, ?, ?, ?)                             \
                             ", (username_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
 
         connection.commit()
@@ -197,17 +197,17 @@ def get_messages(cursor):
     
     messages = cursor.execute("                                                             \
         SELECT                                                                              \
-            username,                                                                           \
+            nickname,                                                                       \
             message_type,                                                                   \
             timestamp_ms                                                                    \
         FROM                                                                                \
             messages                                                                        \
             JOIN message_types ON messages.message_type_id = message_types.message_type_id  \
-            JOIN usernames ON messages.username_id = usernames.username_id                                  \
+            JOIN usernames ON messages.username_id = usernames.username_id                  \
         WHERE message_type != 'unsent'                                                      \
             ").fetchall()
             
-    df = pd.DataFrame(messages, columns=['name', 'message_type', 'timestamp_ms'])
+    df = pd.DataFrame(messages, columns=['nickname', 'message_type', 'timestamp_ms'])
     df['date'] = df['timestamp_ms'].map(truncate_timestamp)
     df.drop(columns=['timestamp_ms'], inplace=True)
     return df

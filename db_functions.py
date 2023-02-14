@@ -72,6 +72,23 @@ def check_data_file(cursor):
     
     return is_data_new, db_dates, file_dates
 
+def update_nickname(content, cursor):
+    
+    begin_str = 'set the nickname for'
+    begin_ind = content.index(begin_str) + len(begin_str) + 1
+    end_ind = content.index(' to ', begin_ind)
+    username = content[begin_ind:end_ind]
+    nickname = content[end_ind + 4:-1]
+    
+    cursor.execute("        \
+        UPDATE              \
+            usernames       \
+        SET                 \
+            nickname = ?    \
+        WHERE               \
+            username = ?    \
+        ", (nickname, username))
+
 def confirm_data_load(db_dates, file_dates):
     
     if len(db_dates) > 0:
@@ -103,11 +120,11 @@ def load_data(connection, cursor):
                 with open(os.path.join('json', filename)) as file:
                     data = json.load(file)
 
-                for message in data['messages']:
+                for message in reversed(data['messages']):
                     if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
                         pass
                     elif 'content' in message and re.search('^.*set the nickname for.*to.*$', message['content']):
-                        pass
+                        update_nickname(message['content'].encode('latin1').decode('utf8'), cursor)
                     elif 'content' in message and re.search('^.*set your nickname to.*$', message['content']):
                         pass
                     else:

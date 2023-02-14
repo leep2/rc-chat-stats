@@ -214,6 +214,7 @@ def get_messages(cursor):
     
     messages = cursor.execute("                                                             \
         SELECT                                                                              \
+            username,                                                                       \
             nickname,                                                                       \
             message_type,                                                                   \
             timestamp_ms                                                                    \
@@ -224,7 +225,14 @@ def get_messages(cursor):
         WHERE message_type != 'unsent'                                                      \
             ").fetchall()
             
-    df = pd.DataFrame(messages, columns=['nickname', 'message_type', 'timestamp_ms'])
-    df['date'] = df['timestamp_ms'].map(truncate_timestamp)
-    df.drop(columns=['timestamp_ms'], inplace=True)
+    df = pd.DataFrame(messages, columns=['username', 'nickname', 'message_type', 'timestamp_ms'])
+    missing_nicknames = df[df['nickname'].isna()]['username'].unique()
+    if missing_nicknames.size == 0:
+        df['date'] = df['timestamp_ms'].map(truncate_timestamp)
+        df.drop(columns=['username', 'timestamp_ms'], inplace=True)
+    else:
+        print('Missing nicknames:')
+        print(missing_nicknames)
+        df = pd.DataFrame()
+
     return df

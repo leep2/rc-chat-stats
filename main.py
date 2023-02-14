@@ -60,11 +60,13 @@ if __name__ == '__main__':
         with closing(connection.cursor()) as cursor:
             load_data(connection, cursor)
             messages = get_messages(cursor)
+            
+    if not messages.empty:
 
-    counts = combine_message_counts(messages)
-    totals = total_messages(messages)
+        counts = combine_message_counts(messages)
+        totals = total_messages(messages)
 
-    workbook = set_workbook()
-    update_sheet(workbook, 'Member messages', counts)
-    update_sheet(workbook, 'Total messages', totals)
-    print('Writing to Google Sheets')
+        workbook = set_workbook()
+        update_sheet(workbook, 'Member messages', counts)
+        update_sheet(workbook, 'Total messages', totals)
+        print('Writing to Google Sheets')

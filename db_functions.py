@@ -72,6 +72,23 @@ def check_data_file(cursor):
     
     return is_data_new, db_dates, file_dates
 
+def update_nickname(content, cursor):
+    
+    begin_str = 'set the nickname for'
+    begin_ind = content.index(begin_str) + len(begin_str) + 1
+    end_ind = content.index(' to ', begin_ind)
+    username = content[begin_ind:end_ind]
+    nickname = content[end_ind + 4:-1]
+    
+    cursor.execute("        \
+        UPDATE              \
+            usernames       \
+        SET                 \
+            nickname = ?    \
+        WHERE               \
+            username = ?    \
+        ", (nickname, username))
+
 def confirm_data_load(db_dates, file_dates):
     
     if len(db_dates) > 0:
@@ -103,11 +120,11 @@ def load_data(connection, cursor):
                 with open(os.path.join('json', filename)) as file:
                     data = json.load(file)
 
-                for message in data['messages']:
+                for message in reversed(data['messages']):
                     if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
                         pass
                     elif 'content' in message and re.search('^.*set the nickname for.*to.*$', message['content']):
-                        pass
+                        update_nickname(message['content'].encode('latin1').decode('utf8'), cursor)
                     elif 'content' in message and re.search('^.*set your nickname to.*$', message['content']):
                         pass
                     else:
@@ -135,29 +152,29 @@ def load_data(connection, cursor):
                             message_type = 'sticker'
                             count = 1
 
-                        name = message['sender_name']
-                        name_id_result = cursor.execute("   \
-                            SELECT                          \
-                                name_id                     \
-                            FROM                            \
-                                names                       \
-                            WHERE                           \
-                                name = ?                    \
-                            ", (name,)).fetchone()
-                        if not name_id_result:
-                            cursor.execute("                \
-                                INSERT INTO names (name)    \
-                                VALUES                      \
-                                    (?)                     \
-                                ", (name,))
-                            name_id_result = cursor.execute("   \
-                                SELECT                          \
-                                    name_id                     \
-                                FROM                            \
-                                    names                       \
-                                WHERE                           \
-                                    name = ?                    \
-                                ", (name,)).fetchone()
+                        username = message['sender_name']
+                        username_id_result = cursor.execute("   \
+                            SELECT                              \
+                                username_id                     \
+                            FROM                                \
+                                usernames                       \
+                            WHERE                               \
+                                username = ?                    \
+                            ", (username,)).fetchone()
+                        if not username_id_result:
+                            cursor.execute("                        \
+                                INSERT INTO usernames (username)    \
+                                VALUES                              \
+                                    (?)                             \
+                                ", (username,))
+                            username_id_result = cursor.execute("   \
+                                SELECT                              \
+                                    username_id                     \
+                                FROM                                \
+                                    usernames                       \
+                                WHERE                               \
+                                    username = ?                    \
+                                ", (username,)).fetchone()
 
                         message_type_id_result = cursor.execute("   \
                             SELECT                                  \
@@ -181,14 +198,14 @@ def load_data(connection, cursor):
                                     message_type = ?                    \
                                 ", (message_type,)).fetchone()
 
-                        cursor.execute("                                \
-                            INSERT INTO messages (                      \
-                                name_id, message_type_id, timestamp_ms, \
-                                item_count, content                     \
-                            )                                           \
-                            VALUES                                      \
-                                (?, ?, ?, ?, ?)                         \
-                            ", (name_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
+                        cursor.execute("                                    \
+                            INSERT INTO messages (                          \
+                                username_id, message_type_id, timestamp_ms, \
+                                item_count, content                         \
+                            )                                               \
+                            VALUES                                          \
+                                (?, ?, ?, ?, ?)                             \
+                            ", (username_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
 
         connection.commit()
         confirm_data_load(db_dates, file_dates)
@@ -197,17 +214,25 @@ def get_messages(cursor):
     
     messages = cursor.execute("                                                             \
         SELECT                                                                              \
-            name,                                                                           \
+            username,                                                                       \
+            nickname,                                                                       \
             message_type,                                                                   \
             timestamp_ms                                                                    \
         FROM                                                                                \
             messages                                                                        \
             JOIN message_types ON messages.message_type_id = message_types.message_type_id  \
-            JOIN names ON messages.name_id = names.name_id                                  \
+            JOIN usernames ON messages.username_id = usernames.username_id                  \
         WHERE message_type != 'unsent'                                                      \
             ").fetchall()
             
-    df = pd.DataFrame(messages, columns=['name', 'message_type', 'timestamp_ms'])
-    df['date'] = df['timestamp_ms'].map(truncate_timestamp)
-    df.drop(columns=['timestamp_ms'], inplace=True)
+    df = pd.DataFrame(messages, columns=['username', 'nickname', 'message_type', 'timestamp_ms'])
+    missing_nicknames = df[df['nickname'].isna()]['username'].unique()
+    if missing_nicknames.size == 0:
+        df['date'] = df['timestamp_ms'].map(truncate_timestamp)
+        df.drop(columns=['username', 'timestamp_ms'], inplace=True)
+    else:
+        print('Missing nicknames:')
+        print(missing_nicknames)
+        df = pd.DataFrame()
+
     return df

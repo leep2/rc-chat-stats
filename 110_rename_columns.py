@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
             cursor.execute("    \
                 ALTER TABLE     \
-                    names RENAME TO usernames')
+                    names RENAME TO usernames")
             cursor.execute("    \
                 ALTER TABLE     \
                     usernames RENAME COLUMN name_id to username_id")

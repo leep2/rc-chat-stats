@@ -25,7 +25,7 @@ if __name__ == '__main__':
                 )                                               \
                 SELECT                                          \
                     message_id,                                 \
-                    name_id,                                    \
+                    username_id,                                \
                     message_type_id,                            \
                     timestamp_ms,                               \
                     item_count,                                 \

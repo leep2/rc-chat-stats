@@ -6,19 +6,9 @@ if __name__ == '__main__':
     with closing(sqlite3.connect('rc_chat_log.db')) as connection:
         with closing (connection.cursor()) as cursor:
 
-#            cursor.execute("    \
-#                ALTER TABLE     \
-#                    names RENAME TO usernames")
-#            cursor.execute("    \
-#                ALTER TABLE     \
-#                    usernames RENAME COLUMN name_id to username_id")
-#            cursor.execute("    \
-#                ALTER TABLE     \
-#                    usernames RENAME COLUMN name TO username")
-
-#            cursor.execute("    \
-#                ALTER TABLE     \
-#                    messages RENAME COLUMN name_id to username_id")
+            cursor.execute("    \
+                ALTER TABLE     \
+                    names RENAME TO usernames")
             
             cursor.execute("                            \
                 CREATE TABLE usernamesTemp (            \
@@ -35,7 +25,7 @@ if __name__ == '__main__':
                     timestamp_ms INTEGER NOT NULL,                                              \
                     item_count INTEGER NOT NULL,                                                \
                     content TEXT,                                                               \
-                    FOREIGN KEY (username_id) REFERENCES usernamesTemp (username_id),           \
+                    FOREIGN KEY (username_id) REFERENCES usernames (username_id),               \
                     FOREIGN KEY (message_type_id) REFERENCES message_types (message_type_id))   \
                     ")
             

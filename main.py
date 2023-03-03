@@ -1,10 +1,12 @@
 from datetime import datetime, date, timedelta
 import sqlite3
 from contextlib import closing
-from db_functions import load_data, get_messages
+from db_functions import load_data, get_messages, get_message_content
 import pandas as pd
 import os
 import time
+import spacy
+from collections import Counter
 import configparser
 import pygsheets
 
@@ -32,6 +34,20 @@ def combine_message_counts(df):
     beginning = message_counts(df)
     beginning['period'] = 'd. ' + BEGIN_DATE.strftime('%b %d') + ' to date'
     return pd.concat([yesterday, day_before, week, beginning], axis=0)
+
+def lemma_counts(contents):
+
+    day = ''
+    for content in contents:
+        day += ' ' + content[0]    
+    day = day.replace('\n', '')
+    
+    nlp = spacy.load('en_core_web_sm')
+    nlp.add_pipe("emoji", first=True)
+    doc = nlp(day)
+    lst = [token.lemma_ for token in doc if not token._.is_emoji and not token.is_stop and not token.is_punct]
+    counts = Counter(lst)
+    return pd.DataFrame.from_dict(counts, orient='index', columns=['count']).reset_index()
     
 def set_workbook():
     
@@ -60,13 +76,16 @@ if __name__ == '__main__':
         with closing(connection.cursor()) as cursor:
             load_data(connection, cursor)
             messages = get_messages(cursor)
+            message_content = get_message_content(cursor)
             
     if not messages.empty:
 
         counts = combine_message_counts(messages)
         totals = total_messages(messages)
+        lemma_counts = lemma_counts(message_content)
 
         workbook = set_workbook()
         update_sheet(workbook, 'Member messages', counts)
         update_sheet(workbook, 'Total messages', totals)
+        update_sheet(workbook, 'Word cloud', lemma_counts)
         print('Writing to Google Sheets')

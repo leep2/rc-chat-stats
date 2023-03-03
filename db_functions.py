@@ -4,6 +4,7 @@ import pandas as pd
 from date_handling import truncate_timestamp
 import json
 import re
+from datetime import datetime, date
 
 def handle_zip_file():
     
@@ -236,3 +237,25 @@ def get_messages(cursor):
         df = pd.DataFrame()
 
     return df
+
+def get_message_content(cursor):
+    end_timestamp = cursor.execute("    \
+        SELECT                          \
+            MAX(timestamp_ms)           \
+        FROM                            \
+            messages                    \
+        ").fetchone()[0]
+    dt = datetime.fromtimestamp(end_timestamp/1000)
+    day = 1000 * datetime(dt.year, dt.month, dt.day).timestamp()
+    
+    message_content = cursor.execute("                                                      \
+        SELECT                                                                              \
+            content                                                                         \
+        FROM                                                                                \
+            messages                                                                        \
+            JOIN message_types ON messages.message_type_id = message_types.message_type_id  \
+        WHERE                                                                               \
+            message_type = 'content'                                                        \
+            AND timestamp_ms >= ?", (day,)).fetchall()
+    
+    return message_content

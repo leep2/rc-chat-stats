@@ -1,2 +1,4 @@
 pandas
 pygsheets
+spacy
+spacymoji

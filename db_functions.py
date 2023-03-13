@@ -74,22 +74,23 @@ def check_data_file(cursor):
     return is_data_new, db_dates, file_dates
 
 def update_nickname(content, cursor):
+
+    print(content)
+#    begin_str = 'set the nickname for'
+#    begin_ind = content.index(begin_str) + len(begin_str) + 1
+#    end_ind = content.index(' to ', begin_ind)
+#    username = content[begin_ind:end_ind]
+#    nickname = content[end_ind + 4:-1]
     
-    begin_str = 'set the nickname for'
-    begin_ind = content.index(begin_str) + len(begin_str) + 1
-    end_ind = content.index(' to ', begin_ind)
-    username = content[begin_ind:end_ind]
-    nickname = content[end_ind + 4:-1]
-    
-    cursor.execute("        \
-        UPDATE              \
-            usernames       \
-        SET                 \
-            nickname = ?    \
-        WHERE               \
-            username = ?    \
-        ", (nickname, username))
-    return username + ', ' + nickname
+#    cursor.execute("        \
+#        UPDATE              \
+#            usernames       \
+#        SET                 \
+#            nickname = ?    \
+#        WHERE               \
+#            username = ?    \
+#        ", (nickname, username))
+#    return username + ', ' + nickname
 
 def confirm_data_load(db_dates, file_dates):
     
@@ -108,7 +109,7 @@ def confirm_data_load(db_dates, file_dates):
     print('\nDates loaded:')
     for dt in file_dates:
         print(dt.strftime('%Y-%m-%d'))
-    os.system('mv ' + os.path.join('json', '*.json') + ' ' + os.path.join('json', 'loaded'))
+#    os.system('mv ' + os.path.join('json', '*.json') + ' ' + os.path.join('json', 'loaded'))
 
 def load_data(connection, cursor):
     
@@ -127,7 +128,7 @@ def load_data(connection, cursor):
                 for message in reversed(data['messages']):
                     if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
                         pass
-                    elif 'content' in message and re.search('^.*set the nickname for.*to.*$', message['content']):
+                    elif 'content' in message and (re.search('^.*set the nickname for.*to.*$', message['content']) or re.search('^.*set his own nickname to.*$', message['content'])):
                         updated_nicknames.append(update_nickname(message['content'].encode('latin1').decode('utf8'), cursor))
                     elif 'content' in message and re.search('^.*set your nickname to.*$', message['content']):
                         pass
@@ -211,7 +212,7 @@ def load_data(connection, cursor):
                                 (?, ?, ?, ?, ?)                             \
                             ", (username_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
 
-        connection.commit()
+#        connection.commit()
 
         if updated_nicknames:
             print('Updated nicknames:')

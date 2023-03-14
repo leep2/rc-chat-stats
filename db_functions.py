@@ -75,12 +75,23 @@ def check_data_file(cursor):
 
 def update_nickname(content, cursor):
 
-    print(content)
-#    begin_str = 'set the nickname for'
-#    begin_ind = content.index(begin_str) + len(begin_str) + 1
-#    end_ind = content.index(' to ', begin_ind)
-#    username = content[begin_ind:end_ind]
-#    nickname = content[end_ind + 4:-1]
+    if re.search('^.*set the nickname for.*to.*$', content):
+        begin_str = 'set the nickname for'
+        begin_ind = content.index(begin_str) + len(begin_str) + 1
+        end_ind = content.index(' to ', begin_ind)
+        username = content[begin_ind:end_ind]
+        nickname = content[end_ind + 4:-1]
+        print(username, nickname)
+    else:
+        if re.search('^.*set her own nickname to.*$', content):
+            gender = 'her'
+        else:
+            gender = 'his'
+        begin_str = 'set ' + gender + ' own nickname to'
+        begin_ind = content.index(begin_str) - 1
+        username = content[:begin_ind]
+        print(username)
+        
     
 #    cursor.execute("        \
 #        UPDATE              \

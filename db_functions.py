@@ -128,7 +128,7 @@ def load_data(connection, cursor):
                 for message in reversed(data['messages']):
                     if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
                         pass
-                    elif 'content' in message and (re.search('^.*set the nickname for.*to.*$', message['content']) or re.search('^.*set his own nickname to.*$', message['content'])):
+                    elif 'content' in message and (re.search('^.*set the nickname for.*to.*$', message['content']) or re.search('^.*set h(er|is) own nickname to.*$', message['content'])):
                         updated_nicknames.append(update_nickname(message['content'].encode('latin1').decode('utf8'), cursor))
                     elif 'content' in message and re.search('^.*set your nickname to.*$', message['content']):
                         pass

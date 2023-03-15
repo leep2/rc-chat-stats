@@ -39,7 +39,8 @@ def lemma_counts(contents):
 
     day = ''
     for content in contents:
-        day += ' ' + content[0]    
+        if content[0] is not None:
+            day += ' ' + content[0]    
     day = day.replace('\n', '')
     
     nlp = spacy.load('en_core_web_sm')

@@ -73,14 +73,24 @@ def check_data_file(cursor):
     
     return is_data_new, db_dates, file_dates
 
-def update_nickname(content, cursor):
-    
-    begin_str = 'set the nickname for'
-    begin_ind = content.index(begin_str) + len(begin_str) + 1
-    end_ind = content.index(' to ', begin_ind)
-    username = content[begin_ind:end_ind]
-    nickname = content[end_ind + 4:-1]
-    
+def update_nickname(content, sender_name, cursor):
+
+    if re.search('^.*set the nickname for.*to.*$', content):
+        begin_str = 'set the nickname for'
+        begin_ind = content.index(begin_str) + len(begin_str) + 1
+        end_ind = content.index(' to ', begin_ind)
+        username = content[begin_ind:end_ind]
+        nickname = content[end_ind + 4:-1]
+    else:
+        if re.search('^.*set her own nickname to.*$', content):
+            gender = 'her'
+        else:
+            gender = 'his'
+        begin_str = 'set ' + gender + ' own nickname to'
+        end_ind = content.index(begin_str) + len(begin_str) + 1
+        username = sender_name
+        nickname = content[end_ind:]
+            
     cursor.execute("        \
         UPDATE              \
             usernames       \
@@ -127,8 +137,8 @@ def load_data(connection, cursor):
                 for message in reversed(data['messages']):
                     if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
                         pass
-                    elif 'content' in message and re.search('^.*set the nickname for.*to.*$', message['content']):
-                        updated_nicknames.append(update_nickname(message['content'].encode('latin1').decode('utf8'), cursor))
+                    elif 'content' in message and (re.search('^.*set the nickname for.*to.*$', message['content']) or re.search('^.*set h(er|is) own nickname to.*$', message['content'])):
+                        updated_nicknames.append(update_nickname(message['content'].encode('latin1').decode('utf8'), message['sender_name'], cursor))
                     elif 'content' in message and re.search('^.*set your nickname to.*$', message['content']):
                         pass
                     else:

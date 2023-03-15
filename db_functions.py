@@ -167,6 +167,12 @@ def load_data(connection, cursor):
                             count = 1
 
                         username = message['sender_name']
+                        
+################################################################################
+                        if username == 'Facebook user':
+                            username = 'Liz Elizabeth'
+################################################################################
+                        
                         username_id_result = cursor.execute("   \
                             SELECT                              \
                                 username_id                     \

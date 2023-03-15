@@ -10,3 +10,4 @@ if __name__ == '__main__':
                 WHERE                           \
                     username = 'Facebook user'  \
                 ")
+        connection.commit()

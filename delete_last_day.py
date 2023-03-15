@@ -1,8 +1,13 @@
+import os
+import time
 import sqlite3
 from contextlib import closing
 from datetime import datetime
 
 if __name__ == '__main__':
+    
+    os.environ['TZ'] = 'America/Chicago'
+    time.tzset()
 
     with closing(sqlite3.connect('rc_chat_log.db')) as connection:
         with closing (connection.cursor()) as cursor:

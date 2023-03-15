@@ -21,6 +21,6 @@ if __name__ == '__main__':
                     messages            \
                 WHERE                   \
                     timestamp_ms >= ?   \
-                ", (day,)).fetchall()
+                ", (day,))
             
         connection.commit()

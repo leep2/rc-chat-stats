@@ -128,45 +128,61 @@ def load_data(connection, cursor):
     if is_data_new:
         
         updated_nicknames = []
-    
-        for filename in os.listdir('json'):
-            if filename != 'loaded':
-                with open(os.path.join('json', filename)) as file:
-                    data = json.load(file)
+        filename_list = os.listdir('json')
+        filename_list.remove('loaded')
+        filename_list.sort()
+        
+        for filename in filename_list:
+            with open(os.path.join('json', filename)) as file:
+                data = json.load(file)
 
-                for message in reversed(data['messages']):
-                    if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
-                        pass
-                    elif 'content' in message and (re.search('^.*set the nickname for.*to.*$', message['content']) or re.search('^.*set h(er|is) own nickname to.*$', message['content'])):
-                        updated_nicknames.append(update_nickname(message['content'].encode('latin1').decode('utf8'), message['sender_name'], cursor))
-                    elif 'content' in message and re.search('^.*set your nickname to.*$', message['content']):
-                        pass
-                    else:
-                        content = None
-                        if 'is_unsent' in message and message['is_unsent']:
-                            message_type = 'unsent'
-                            count = 1
-                        elif 'content' in message:
-                            message_type = 'content'
-                            content = message['content'].encode('latin1').decode('utf8')
-                            count = len(content.split())
-                        elif 'gifs' in message:
-                            message_type = 'gifs'
-                            count = len(message['gifs'])
-                        elif 'photos' in message:
-                            message_type = 'photos'
-                            count = len(message['photos'])
-                        elif 'audio_files' in message:
-                            message_type = 'audio_files'
-                            count = len(message['audio_files'])
-                        elif 'videos' in message:
-                            message_type = 'videos'
-                            count = len(message['videos'])
-                        elif 'sticker' in message:
-                            message_type = 'sticker'
-                            count = 1
+            for message in reversed(data['messages']):
+                if 'content' in message and re.search('^.*reacted.*to your message $', message['content']):
+                    pass
+                elif 'content' in message and (re.search('^.*set the nickname for.*to.*$', message['content']) or re.search('^.*set h(er|is) own nickname to.*$', message['content'])):
+                    updated_nicknames.append(update_nickname(message['content'].encode('latin1').decode('utf8'), message['sender_name'], cursor))
+                elif 'content' in message and re.search('^.*set your nickname to.*$', message['content']):
+                    pass
+                else:
+                    content = None
+                    if 'is_unsent' in message and message['is_unsent']:
+                        message_type = 'unsent'
+                        count = 1
+                    elif 'content' in message:
+                        message_type = 'content'
+                        content = message['content'].encode('latin1').decode('utf8')
+                        count = len(content.split())
+                    elif 'gifs' in message:
+                        message_type = 'gifs'
+                        count = len(message['gifs'])
+                    elif 'photos' in message:
+                        message_type = 'photos'
+                        count = len(message['photos'])
+                    elif 'audio_files' in message:
+                        message_type = 'audio_files'
+                        count = len(message['audio_files'])
+                    elif 'videos' in message:
+                        message_type = 'videos'
+                        count = len(message['videos'])
+                    elif 'sticker' in message:
+                        message_type = 'sticker'
+                        count = 1
 
-                        username = message['sender_name']
+                    username = message['sender_name']
+                    username_id_result = cursor.execute("   \
+                        SELECT                              \
+                            username_id                     \
+                        FROM                                \
+                            usernames                       \
+                        WHERE                               \
+                            username = ?                    \
+                        ", (username,)).fetchone()
+                    if not username_id_result:
+                        cursor.execute("                        \
+                            INSERT INTO usernames (username)    \
+                            VALUES                              \
+                                (?)                             \
+                            ", (username,))
                         username_id_result = cursor.execute("   \
                             SELECT                              \
                                 username_id                     \
@@ -175,21 +191,20 @@ def load_data(connection, cursor):
                             WHERE                               \
                                 username = ?                    \
                             ", (username,)).fetchone()
-                        if not username_id_result:
-                            cursor.execute("                        \
-                                INSERT INTO usernames (username)    \
-                                VALUES                              \
-                                    (?)                             \
-                                ", (username,))
-                            username_id_result = cursor.execute("   \
-                                SELECT                              \
-                                    username_id                     \
-                                FROM                                \
-                                    usernames                       \
-                                WHERE                               \
-                                    username = ?                    \
-                                ", (username,)).fetchone()
 
+                    message_type_id_result = cursor.execute("   \
+                        SELECT                                  \
+                            message_type_id                     \
+                        FROM                                    \
+                            message_types                       \
+                        WHERE                                   \
+                            message_type = ?                    \
+                        ", (message_type,)).fetchone()
+                    if not message_type_id_result:
+                        cursor.execute("                                \
+                            INSERT INTO message_types (message_type)    \
+                            VALUES                                      \
+                            (?)", (message_type,))
                         message_type_id_result = cursor.execute("   \
                             SELECT                                  \
                                 message_type_id                     \
@@ -198,28 +213,15 @@ def load_data(connection, cursor):
                             WHERE                                   \
                                 message_type = ?                    \
                             ", (message_type,)).fetchone()
-                        if not message_type_id_result:
-                            cursor.execute("                                \
-                                INSERT INTO message_types (message_type)    \
-                                VALUES                                      \
-                                (?)", (message_type,))
-                            message_type_id_result = cursor.execute("   \
-                                SELECT                                  \
-                                    message_type_id                     \
-                                FROM                                    \
-                                    message_types                       \
-                                WHERE                                   \
-                                    message_type = ?                    \
-                                ", (message_type,)).fetchone()
 
-                        cursor.execute("                                    \
-                            INSERT INTO messages (                          \
-                                username_id, message_type_id, timestamp_ms, \
-                                item_count, content                         \
-                            )                                               \
-                            VALUES                                          \
-                                (?, ?, ?, ?, ?)                             \
-                            ", (username_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
+                    cursor.execute("                                    \
+                        INSERT INTO messages (                          \
+                            username_id, message_type_id, timestamp_ms, \
+                            item_count, content                         \
+                        )                                               \
+                        VALUES                                          \
+                            (?, ?, ?, ?, ?)                             \
+                        ", (username_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
 
         connection.commit()
 

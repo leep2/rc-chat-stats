@@ -7,6 +7,7 @@ import os
 import time
 import spacy
 from collections import Counter
+from sklearn.feature_extraction.text import TfidfVectorizer
 import configparser
 import pygsheets
 
@@ -49,6 +50,39 @@ def lemma_counts(contents):
     lst = [token.lemma_ for token in doc if not token._.is_emoji and not token.is_stop and not token.is_punct]
     counts = Counter(lst)
     return pd.DataFrame.from_dict(counts, orient='index', columns=['count']).reset_index()
+
+def calc_tfidf(message_content, begin):
+    
+    week = [[] for i in range(7)]
+
+    for message in message_content:
+        if message[1] is not None:
+            week[(datetime.fromtimestamp(message[0]/1000) - begin).days].append(message[1].replace('\n', ''))
+
+    texts = [' '.join(day) for day in week]
+
+    nlp = spacy.load('en_core_web_sm')
+    nlp.add_pipe("emoji", first=True)
+    docs = list(nlp.pipe(texts))
+
+    lemmas_df = pd.DataFrame()
+    lemmas_week = []
+    for i in range(len(week)):
+        lemmas = [token.lemma_ for token in docs[i] if not token._.is_emoji and not token.is_stop and not token.is_punct]
+        lemmas_week.append(' '.join(lemmas))
+        df_day = pd.DataFrame(index=list(set(lemmas)))
+        df_day['date'] = begin + timedelta(i)
+        lemmas_df = pd.concat([lemmas_df, df_day], axis=0)
+
+    tfIdfVectorizer = TfidfVectorizer(use_idf=True)
+    tfIdf = tfIdfVectorizer.fit_transform(lemmas_week)
+    tfidf_df = pd.DataFrame(tfIdf[0].T.todense(), index=tfIdfVectorizer.get_feature_names_out(), columns=["TF-IDF"])
+
+    df = pd.merge(lemmas_df, tfidf_df, left_index=True, right_index=True)
+    last_day = df[df['date'] == begin + timedelta(6)]
+    last_day = last_day.drop('date', axis=1)
+#    print(last_day)
+    return last_day
     
 def set_workbook():
     
@@ -61,12 +95,12 @@ def set_workbook():
     api = pygsheets.authorize(service_file=creds)
     return api.open(config['DEFAULT']['sheets_filename'])
 
-def update_sheet(wb, sheet_name, df):
+def update_sheet(wb, sheet_name, df, copy_index=False):
 
     # open the sheet by name
     sheet = wb.worksheet_by_title(sheet_name)
     sheet.clear()
-    sheet.set_dataframe(df, (1,1))
+    sheet.set_dataframe(df, (1,1), copy_index)
 
 if __name__ == '__main__':
     
@@ -77,16 +111,18 @@ if __name__ == '__main__':
         with closing(connection.cursor()) as cursor:
             load_data(connection, cursor)
             messages = get_messages(cursor)
-            message_content = get_message_content(cursor)
+            message_content, begin = get_message_content(cursor)
             
     if not messages.empty:
 
         counts = combine_message_counts(messages)
         totals = total_messages(messages)
-        lemma_counts = lemma_counts(message_content)
+#        lemma_counts = lemma_counts(message_content)
+        tfidf = calc_tfidf(message_content, begin)
 
         workbook = set_workbook()
         update_sheet(workbook, 'Member messages', counts)
         update_sheet(workbook, 'Total messages', totals)
-        update_sheet(workbook, 'Word cloud', lemma_counts)
+#        update_sheet(workbook, 'Word cloud', lemma_counts)
+        update_sheet(workbook, 'Word cloud', tfidf, True)
         print('Writing to Google Sheets')

@@ -280,9 +280,5 @@ def get_message_content(cursor):
         WHERE                                                                               \
             message_type = 'content'                                                        \
             AND timestamp_ms >= ?", (day,)).fetchall()
-    
-#    df = pd.DataFrame(message_content, columns=['timestamp_ms', 'content'])
-#    df['date'] = df['timestamp_ms'].map(truncate_timestamp)
-#    df.drop(columns=['timestamp_ms'], inplace=True)
-    
+        
     return message_content, begin

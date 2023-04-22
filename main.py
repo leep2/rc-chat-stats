@@ -36,21 +36,6 @@ def combine_message_counts(df):
     beginning['period'] = 'd. ' + BEGIN_DATE.strftime('%b %d') + ' to date'
     return pd.concat([yesterday, day_before, week, beginning], axis=0)
 
-def lemma_counts(contents):
-
-    day = ''
-    for content in contents:
-        if content[0] is not None:
-            day += ' ' + content[0]    
-    day = day.replace('\n', '')
-    
-    nlp = spacy.load('en_core_web_sm')
-    nlp.add_pipe("emoji", first=True)
-    doc = nlp(day)
-    lst = [token.lemma_ for token in doc if not token._.is_emoji and not token.is_stop and not token.is_punct]
-    counts = Counter(lst)
-    return pd.DataFrame.from_dict(counts, orient='index', columns=['count']).reset_index()
-
 def calc_tfidf(message_content, begin):
     
     week = [[] for i in range(7)]
@@ -81,7 +66,7 @@ def calc_tfidf(message_content, begin):
     df = pd.merge(lemmas_df, tfidf_df, left_index=True, right_index=True)
     last_day = df[df['date'] == begin + timedelta(6)]
     last_day = last_day.drop('date', axis=1)
-#    print(last_day)
+
     return last_day
     
 def set_workbook():
@@ -117,12 +102,10 @@ if __name__ == '__main__':
 
         counts = combine_message_counts(messages)
         totals = total_messages(messages)
-#        lemma_counts = lemma_counts(message_content)
         tfidf = calc_tfidf(message_content, begin)
 
         workbook = set_workbook()
         update_sheet(workbook, 'Member messages', counts)
         update_sheet(workbook, 'Total messages', totals)
-#        update_sheet(workbook, 'Word cloud', lemma_counts)
         update_sheet(workbook, 'Word cloud', tfidf, True)
         print('Writing to Google Sheets')

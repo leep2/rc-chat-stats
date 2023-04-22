@@ -1,4 +1,5 @@
 pandas
 pygsheets
+scikit-learn
 spacy
 spacymoji

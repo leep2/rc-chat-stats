@@ -4,7 +4,7 @@ import pandas as pd
 from date_handling import truncate_timestamp
 import json
 import re
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 def handle_zip_file():
     
@@ -267,10 +267,12 @@ def get_message_content(cursor):
             messages                    \
         ").fetchone()[0]
     dt = datetime.fromtimestamp(end_timestamp/1000)
-    day = 1000 * datetime(dt.year, dt.month, dt.day).timestamp()
+    begin = datetime(dt.year, dt.month, dt.day) - timedelta(days=6)
+    day = 1000 * begin.timestamp()
     
     message_content = cursor.execute("                                                      \
         SELECT                                                                              \
+            timestamp_ms,                                                                   \
             content                                                                         \
         FROM                                                                                \
             messages                                                                        \
@@ -278,5 +280,5 @@ def get_message_content(cursor):
         WHERE                                                                               \
             message_type = 'content'                                                        \
             AND timestamp_ms >= ?", (day,)).fetchall()
-    
-    return message_content
+        
+    return message_content, begin

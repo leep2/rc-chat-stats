@@ -17,8 +17,6 @@ updated_nicknames = []
 filelist = sorted(os.listdir('json'))
 filelist.remove('loaded')
 
-#filename = 'message_20230205_PT.json'
-
 with closing(sqlite3.connect('rc_chat_log.db')) as connection:
     with closing(connection.cursor()) as cursor:
 
@@ -122,18 +120,3 @@ if updated_nicknames:
     print('Updated nicknames:')
     for nickname in updated_nicknames:
         print(nickname)
-    
-#for message in reversed(data['messages']):
-    #print(datetime.fromtimestamp(message['timestamp_ms']/1000))
-    
-#timestamps = [datetime.fromtimestamp(message['timestamp_ms']/1000) for message in data['messages']]
-#print(min(timestamps))
-#print(max(timestamps))
-
-#selected_date = input('Enter selected date (YYYY-MM-DD): ')
-#sel_dt = datetime.strptime(selected_date, '%Y-%m-%d')
-#print(sel_dt)
-#print(sel_dt + timedelta(days=1))
-
-#day = [timestamp for timestamp in timestamps if timestamp >= sel_dt and timestamp < sel_dt + timedelta(days=1)]
-#print(len(day))

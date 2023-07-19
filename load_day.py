@@ -117,6 +117,11 @@ with closing(sqlite3.connect('rc_chat_log.db')) as connection:
                             ", (username_id_result[0], message_type_id_result[0], message['timestamp_ms'], count, content))
 
         connection.commit()
+        
+if updated_nicknames:
+    print('Updated nicknames:')
+    for nickname in updated_nicknames:
+        print(nickname)
     
 #for message in reversed(data['messages']):
     #print(datetime.fromtimestamp(message['timestamp_ms']/1000))

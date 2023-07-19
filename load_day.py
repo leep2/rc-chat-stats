@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import sqlite3
 from contextlib import closing
 import re
+from db_functions import update_nickname
 
 os.environ['TZ'] = 'America/Chicago'
 time.tzset()

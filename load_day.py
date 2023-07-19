@@ -13,6 +13,7 @@ time.tzset()
 selected_date = input('Enter selected date (YYYY-MM-DD): ')
 sel_dt = datetime.strptime(selected_date, '%Y-%m-%d')
 
+updated_nicknames = []
 filelist = sorted(os.listdir('json'))
 filelist.remove('loaded')
 

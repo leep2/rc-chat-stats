@@ -121,6 +121,7 @@ if __name__ == '__main__':
         workbook = set_workbook()
         update_sheet(workbook, 'Member messages', counts)
         counts['abb_nickname'] = counts['nickname'].apply(abbreviate)
+        counts.drop(columns=['nickname'], inplace=True)
         update_sheet(workbook, 'Abbreviated member messages', counts)
         update_sheet(workbook, 'Total messages', totals)
         update_sheet(workbook, 'Word cloud', tfidf, True)

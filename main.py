@@ -8,6 +8,8 @@ import time
 import spacy
 from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer
+import re
+import emoji
 import configparser
 import pygsheets
 
@@ -68,6 +70,18 @@ def calc_tfidf(message_content, begin):
     last_day = last_day.drop('date', axis=1)
 
     return last_day
+
+def abbreviate(fullname):
+    if re.search('^[A-Z]{2,3}$', fullname):
+        return fullname
+    abb = []
+    lst = fullname.split()
+    for item in lst:
+        if item[0] in emoji.EMOJI_UNICODE.values():
+            abb.append(item)
+        else:
+            abb.append(item[0].capitalize())
+    return ('').join(abb)
     
 def set_workbook():
     
@@ -106,6 +120,8 @@ if __name__ == '__main__':
 
         workbook = set_workbook()
         update_sheet(workbook, 'Member messages', counts)
+        counts['abb_nickname'] = counts['nickname'].apply(abbreviate)
+        update_sheet(workbook, 'Abbreviated member messages', counts)
         update_sheet(workbook, 'Total messages', totals)
         update_sheet(workbook, 'Word cloud', tfidf, True)
         print('Writing to Google Sheets')

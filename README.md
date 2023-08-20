@@ -2,3 +2,5 @@ RC (Relationships Chat) is an active subchat for a private Facebook group, avera
 
 Getting new data is currently a manual process. Selenium and Cypress were tried unsuccessfully and unsurprisingly as Facebook does its best to prevent automated browsers. So data is downloaded via clicking through Facebook's UI. In the future, there might be the possibility of creating a macro with specifying pixel positions to click, but that falls outside the scope of the project.
 
+Data is inserted into the following database:
+![Alt text](/images/db_diagram.png?raw=true "Database diagram")

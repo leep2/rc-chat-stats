@@ -6,3 +6,7 @@ Data is persisted in a relational database. SQLite was chosen for simplicity. In
 
 Database schema is as follows:
 ![Alt text](/images/db_diagram.png?raw=true "Database diagram")
+
+At any time within the Facebook chat, users can create/change pseudonyms (both theirs and others). Psueudonyms ("nicknames") are not directly available in the data downloadable from Facebook. Rather, they appear at the time of name change in the following message format:
+![Alt text](/images/nickname_change.png?raw=true "Nickname change")
+Regex/string-handling are used to parse the message content and update the database accordingly.

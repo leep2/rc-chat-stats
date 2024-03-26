@@ -28,14 +28,15 @@ def total_messages(df):
 def combine_message_counts(df):
     BEGIN_DATE = df['date'].min()
     END_DATE = df['date'].max()
+    FORMAT_STR = '%-m-%-d-%y'
     yesterday = message_counts(filter_by_time(df, END_DATE, 0, 0))
-    yesterday['period'] = 'a. ' + END_DATE.strftime('%b %d')
+    yesterday['period'] = 'a. ' + END_DATE.strftime(FORMAT_STR)
     day_before = message_counts(filter_by_time(df, END_DATE, -1, -1))
-    day_before['period'] = 'b. ' + (END_DATE + timedelta(-1)).strftime('%b %d')
+    day_before['period'] = 'b. ' + (END_DATE + timedelta(-1)).strftime(FORMAT_STR)
     week = message_counts(filter_by_time(df, END_DATE, -6, 0))
-    week['period'] = 'c. ' + (END_DATE + timedelta(-6)).strftime('%b %d') + ' to ' + END_DATE.strftime('%b %d')
+    week['period'] = 'c. ' + (END_DATE + timedelta(-6)).strftime(FORMAT_STR) + ' to ' + END_DATE.strftime(FORMAT_STR)
     beginning = message_counts(df)
-    beginning['period'] = 'd. ' + BEGIN_DATE.strftime('%b %d') + ' to date'
+    beginning['period'] = 'd. ' + BEGIN_DATE.strftime(FORMAT_STR) + ' to date'
     return pd.concat([yesterday, day_before, week, beginning], axis=0)
 
 def calc_tfidf(message_content, begin):
@@ -77,7 +78,7 @@ def abbreviate(fullname):
     abb = []
     lst = fullname.split()
     for item in lst:
-        if item[0] in emoji.EMOJI_UNICODE.values():
+        if item[0] in emoji.unicode_codes._EMOJI_UNICODE.values():
             abb.append(item)
         else:
             abb.append(item[0].capitalize())

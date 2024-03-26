@@ -77,7 +77,7 @@ def abbreviate(fullname):
     abb = []
     lst = fullname.split()
     for item in lst:
-        if item[0] in emoji.EMOJI_UNICODE.values():
+        if item[0] in emoji.unicode_codes._EMOJI_UNICODE.values():
             abb.append(item)
         else:
             abb.append(item[0].capitalize())

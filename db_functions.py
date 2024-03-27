@@ -257,7 +257,7 @@ def get_messages(cursor):
         print(missing_nicknames)
         df = pd.DataFrame()
 
-    return df
+    return df[df['date'] >= date(2022, 7, 1)]
 
 def get_message_content(cursor):
     end_timestamp = cursor.execute("    \

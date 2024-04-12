@@ -9,34 +9,43 @@ from datetime import datetime, date, timedelta
 def handle_zip_file():
     
     if len(os.listdir('zip')) > 0:
-    
+
+        json_found_lst = []
         for filename in os.listdir('zip'):
             with ZipFile(os.path.join('zip', filename)) as zip:
                 lst = zip.namelist()
 
+                is_json_found = False
                 for item in lst:
-                    if re.search('^.*/ccsfrelationships_.*/message_1.json$', item):
+                    if re.search('^.*/ccsfrelationshipschatrc_.*/message_1.json$', item):
+                        is_json_found = True
                         break
-                zip.extract(item)
+                if is_json_found:
+                    zip.extract(item)
 
-            with open(item) as file:                    
-                data = json.load(file)
+            if is_json_found:
+                with open(item) as file:                    
+                    data = json.load(file)
 
-            file_dates = set()
-            for message in data['messages']:
-                file_dates.add(truncate_timestamp(message['timestamp_ms']))
+                file_dates = set()
+                for message in data['messages']:
+                    file_dates.add(truncate_timestamp(message['timestamp_ms']))
 
-            begin = min(file_dates)
-            end = max(file_dates)
-            if begin == end:
-                file_suffix = end.strftime('%Y%m%d')
+                begin = min(file_dates)
+                end = max(file_dates)
+                if begin == end:
+                    file_suffix = end.strftime('%Y%m%d')
+                else:
+                    file_suffix = begin.strftime('%Y%m%d') + '_' + end.strftime('%Y%m%d')
+                os.system('mv ' + item + os.path.join(' json', 'message_') + file_suffix + '.json')
+                os.system('rm -r ' + item[:item.find('/')])
             else:
-                file_suffix = begin.strftime('%Y%m%d') + '_' + end.strftime('%Y%m%d')
-            os.system('mv ' + item + os.path.join(' json', 'message_') + file_suffix + '.json')
-            os.system('rm -r ' + item[:item.find('/')])
+                print('json data file not found')
+            json_found_lst.append(is_json_found)
 
-        os.system('rm ' + os.path.join('zip', '*.zip'))
-        print('Extracted from zip file(s) to json folder')
+        if all(json_found_lst):
+            os.system('rm ' + os.path.join('zip', '*.zip'))
+            print('Extracted from zip file(s) to json folder')
 
 def check_data_file(cursor):
     
@@ -252,12 +261,13 @@ def get_messages(cursor):
     if missing_nicknames.size == 0:
         df['date'] = df['timestamp_ms'].map(truncate_timestamp)
         df.drop(columns=['username', 'timestamp_ms'], inplace=True)
+        df = df[df['date'] >= date(2022, 7, 1)]
     else:
         print('Missing nicknames:')
         print(missing_nicknames)
         df = pd.DataFrame()
 
-    return df[df['date'] >= date(2022, 7, 1)]
+    return df
 
 def get_message_content(cursor):
     end_timestamp = cursor.execute("    \

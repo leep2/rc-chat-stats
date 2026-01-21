@@ -10,7 +10,7 @@ dt = 1000 * datetime.strptime(f'{selected_date} {CENTRAL_TIMEZONE}', '%Y-%m-%d %
 with closing(sqlite3.connect('rc_chat_log.db')) as connection:
 	with closing(connection.cursor()) as cursor:
 
-		cursor.execute("INSERT INTO (						\
+		cursor.execute("INSERT INTO messages (				\
 			username_id, message_type_id, timestamp_ms,		\
 			item_count										\
 		)													\
